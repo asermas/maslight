@@ -15,11 +15,23 @@ MasLight drives an addressable LED strip from what is on your screen. It speaks
 WLED UDP, DDP, sACN, Art-Net and Adalight, it runs on Windows and Linux, and
 everything stays on your own machine.
 
-> **Status: 0.2.0 in development.** The Windows path is complete and verified
-> on real hardware: capture, the colour pipeline, audio, scripted effects and
-> UDP output all run end to end. The Linux X11 backend is exercised under Xvfb
-> in continuous integration but has not yet driven a physical strip. Wayland is
-> half done and the [Linux page](docs/linux.md) explains exactly which half.
+> **Status: 0.2.0 in development.** The Windows path runs end to end and is
+> verified in software: screen capture, the colour pipeline, audio, scripted
+> effects and UDP output were all exercised live, with the packets read back
+> off a loopback socket and asserted byte for byte.
+>
+> **No physical LED strip has been driven yet.** The controller this was
+> written for has been offline, so every protocol below is verified against
+> its specification and against a listener, not against a strip on a wall.
+> That is the one gap worth knowing about before you trust it with your
+> hardware. The Linux X11 backend is exercised under Xvfb in continuous
+> integration, on a real X server, but likewise has not driven a strip.
+> Wayland is half done and the [Linux page](docs/linux.md) explains which
+> half.
+
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" alt="The MasLight dashboard, showing a live strip preview and the frame rate, frame time, LED count and capture source" width="900">
+</p>
 
 ## Why this exists
 

@@ -15,11 +15,22 @@ MasLight, ekranındaki görüntüden adreslenebilir LED şeridini sürer. WLED U
 DDP, sACN, Art-Net ve Adalight konuşur; Windows ve Linux'ta çalışır; her şey
 kendi makinende kalır.
 
-> **Durum: 0.2.0 geliştiriliyor.** Windows yolu tamamlandı ve gerçek donanımda
-> doğrulandı: yakalama, renk hattı, ses, script efektleri ve UDP çıkışı uçtan
-> uca çalışıyor. Linux X11 arka ucu CI'da Xvfb altında gerçekten çalıştırılıyor
-> ama henüz fiziksel bir şerit sürmedi. Wayland yarım; hangi yarısının bittiğini
-> [Linux sayfası](docs/linux.md) açıkça anlatıyor.
+> **Durum: 0.2.0 geliştiriliyor.** Windows yolu uçtan uca çalışıyor ve
+> yazılım tarafında doğrulandı: ekran yakalama, renk hattı, ses, script
+> efektleri ve UDP çıkışı canlı olarak çalıştırıldı; paketler loopback
+> soketinden geri okunup bayt bayt doğrulandı.
+>
+> **Henüz fiziksel bir LED şeridi sürülmedi.** Bunun için yazıldığı kontrolcü
+> çevrimdışıydı; yani aşağıdaki protokollerin hepsi kendi şartnamelerine ve
+> bir dinleyiciye karşı doğrulandı, duvardaki bir şeride karşı değil.
+> Donanımını emanet etmeden önce bilinmesi gereken tek boşluk bu. Linux X11
+> arka ucu CI'da Xvfb altında, gerçek bir X sunucusunda çalıştırılıyor ama o
+> da bir şerit sürmedi. Wayland yarım; hangi yarısının bittiğini
+> [Linux sayfası](docs/linux.md) anlatıyor.
+
+<p align="center">
+  <img src="assets/screenshots/dashboard.tr.png" alt="MasLight paneli: canlı şerit önizlemesi, kare hızı, kare süresi, LED sayısı ve yakalama kaynağı" width="900">
+</p>
 
 ## Neden var
 

@@ -47,7 +47,14 @@ const NAV: { id: Screen; key: MessageKey; icon: typeof Gauge }[] = [
 
 export default function App() {
   const store = useMasLight();
-  const [screen, setScreen] = useState<Screen>("dashboard");
+  // The window can be opened straight onto a screen with a fragment, as in
+  // #devices. The tray menu uses it to jump to a specific page, and the
+  // documentation screenshots use it to photograph each one without a human
+  // clicking through the sidebar.
+  const [screen, setScreen] = useState<Screen>(() => {
+    const wanted = window.location.hash.replace("#", "");
+    return NAV.some((n) => n.id === wanted) ? (wanted as Screen) : "dashboard";
+  });
   const [examples, setExamples] = useState<ScriptExample[]>([]);
 
   useEffect(() => {

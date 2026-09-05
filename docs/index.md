@@ -10,6 +10,7 @@ packets it sends to your LED controller.
 
 ## Pages
 
+* [The interface](screens.md)
 * [Installing](install.md)
 * [Linux: X11 and Wayland](linux.md)
 * [The audio mode](audio.md)
