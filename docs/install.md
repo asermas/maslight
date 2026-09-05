@@ -11,9 +11,23 @@ Every tagged release publishes packages built by continuous integration:
 | System | File |
 |---|---|
 | Windows 10 and 11 | `MasLight_x.y.z_x64-setup.exe` or the `.msi` |
-| Debian and Ubuntu | `maslight_x.y.z_amd64.deb` |
-| Fedora | `maslight-x.y.z.x86_64.rpm` |
-| Any Linux | `maslight_x.y.z_amd64.AppImage` |
+| Debian and Ubuntu | `MasLight_x.y.z_amd64.deb` |
+| Fedora | `MasLight-x.y.z-1.x86_64.rpm` |
+| Any Linux | `MasLight_x.y.z_amd64.AppImage` |
+
+These are the names the bundler actually produces, not names anybody wrote
+down and hoped for: the packaging workflow builds all five on every change and
+keeps them, so the table can be checked against real files.
+
+Installing the Debian package pulls in what it needs:
+
+```bash
+sudo apt install ./MasLight_0.1.0_amd64.deb
+```
+
+The package is named `mas-light` inside the archive, which is what the bundler
+makes of the name MasLight. `apt remove mas-light` is therefore the way to
+take it off again.
 
 macOS packages arrive with the 0.3 milestone, when the ScreenCaptureKit
 backend lands.
