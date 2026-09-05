@@ -39,7 +39,9 @@ sahneyi beyaza kırpmıyor.
 
 **Kalibrasyon.** Saf kırmızı gönderip şeridin gerçekte hangi rengi
 gösterdiğini soran bir sihirbaz. Kimse çipinin GRB mi RGB mi olduğunu tahmin
-etmek zorunda kalmıyor.
+etmek zorunda kalmıyor. Bir de LED'leri kamerayla bulan sihirbaz: sekiz deseni
+fotoğraflıyorsun, konumlar da kablolama sırası da fotoğraflardan çıkıyor;
+kimsenin şeridini tarif etmesi gerekmiyor.
 
 ## Ne yapıyor
 
@@ -106,6 +108,7 @@ yakalama arka ucu -> bölge indirgeyici -> renk hattı -> çıkış
 | `maslight-rules` | Otomatik profil değişimi ve gereken platform sondaları. |
 | `maslight-api` | Yerel REST ve WebSocket sunucusu. |
 | `maslight-effects` | Script efektleri için sandbox'lı Rhai çalışma zamanı. |
+| `maslight-calibrate` | Kamerayla konum keşfi ve gereken homografi. |
 | `maslight-engine` | Döngü, profiller, telemetri, gecikme telafisi. |
 | `app/` | Tauri kabuğu ve React arayüzü. |
 
@@ -143,6 +146,7 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 * [Script efektleri](docs/scripting.md)
 * [Çıkış protokolleri](docs/protocols.md)
 * [Yerleşim modeli](docs/layout.md)
+* [Kamerayla keşif](docs/discovery.md)
 * [Kaynaktan derleme](docs/building.md)
 * [Nasıl çalışıyor](docs/architecture.md)
 

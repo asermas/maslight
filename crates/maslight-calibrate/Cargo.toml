@@ -1,0 +1,15 @@
+[package]
+name = "maslight-calibrate"
+description = "MasLight camera assisted LED position discovery"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+maslight-core = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

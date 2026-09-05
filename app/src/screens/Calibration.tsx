@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { CheckCircle } from "@phosphor-icons/react";
 
 import { Alert, Card, Field, Slider } from "../components/ui";
+import { Discovery } from "./Discovery";
 import { api } from "../lib/api";
 import type { Store } from "../lib/store";
 import type { ColorOrder } from "../lib/types";
 
-type Step = "order" | "white" | "latency";
+type Step = "position" | "order" | "white" | "latency";
 
 /**
  * The calibration wizard.
@@ -18,7 +19,7 @@ type Step = "order" | "white" | "latency";
  */
 export function Calibration({ store }: { store: Store }) {
   const { t, profile, updateProfile, setNotice } = store;
-  const [step, setStep] = useState<Step>("order");
+  const [step, setStep] = useState<Step>("position");
 
   // Always release the strip when the screen is left, otherwise a held colour
   // would outlive the wizard.
@@ -28,6 +29,7 @@ export function Calibration({ store }: { store: Store }) {
   const color = profile.color;
 
   const steps: { id: Step; label: string }[] = [
+    { id: "position", label: t("cal.stepPosition") },
     { id: "order", label: t("cal.stepOrder") },
     { id: "white", label: t("cal.stepWhite") },
     { id: "latency", label: t("cal.stepLatency") },
@@ -66,6 +68,8 @@ export function Calibration({ store }: { store: Store }) {
           </button>
         ))}
       </div>
+
+      {step === "position" && <Discovery store={store} />}
 
       {step === "order" && (
         <Card title={t("cal.stepOrder")} subtitle={t("cal.orderBody")}>

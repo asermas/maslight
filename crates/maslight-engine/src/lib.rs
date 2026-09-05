@@ -40,6 +40,8 @@ enum Command {
     },
     /// Drive every LED with one colour, for colour calibration.
     Hold(Option<Rgb8>),
+    /// Light exactly the LEDs in the mask, for position discovery.
+    Pattern(Option<Vec<bool>>),
     Shutdown,
 }
 
@@ -100,6 +102,13 @@ impl EngineHandle {
         let _ = self.tx.send(Command::Hold(color));
     }
 
+    /// Light exactly the LEDs in the mask, white, or `None` to resume.
+    ///
+    /// Used by position discovery, which photographs a sequence of patterns.
+    pub fn show_pattern(&self, mask: Option<Vec<bool>>) {
+        let _ = self.tx.send(Command::Pattern(mask));
+    }
+
     pub fn is_running(&self) -> bool {
         self.alive.load(Ordering::Relaxed)
     }
@@ -154,6 +163,8 @@ struct Worker {
     script: Option<EffectScript>,
     script_scratch: Vec<Rgb>,
     hold: Option<Rgb8>,
+    /// A calibration pattern that overrides everything while it is set.
+    pattern: Option<Vec<bool>>,
     identify_until: Option<(usize, Instant)>,
     dirty: bool,
     last_tick: Instant,
@@ -183,6 +194,7 @@ impl Worker {
             script: None,
             script_scratch: Vec::new(),
             hold: None,
+            pattern: None,
             identify_until: None,
             dirty: true,
             last_tick: Instant::now(),
@@ -223,6 +235,10 @@ impl Worker {
                 }
                 Ok(Command::Hold(color)) => {
                     self.hold = color;
+                    self.pipeline.reset();
+                }
+                Ok(Command::Pattern(mask)) => {
+                    self.pattern = mask;
                     self.pipeline.reset();
                 }
                 Ok(Command::Shutdown) => return ControlFlow::Stop,
@@ -396,6 +412,21 @@ impl Worker {
         if !self.config.enabled || profile.mode == LightMode::Off {
             self.blackout(profile.layout.len());
             std::thread::sleep(Duration::from_millis(120));
+            return;
+        }
+
+        // A discovery pattern outranks everything: the photograph has to show
+        // exactly the LEDs the sequence asked for and nothing else.
+        if let Some(mask) = &self.pattern {
+            let len = profile.layout.len();
+            let mut frame = LedFrame::black(len);
+            for (i, slot) in frame.rgb.iter_mut().enumerate() {
+                if mask.get(i).copied().unwrap_or(false) {
+                    *slot = Rgb8::new(255, 255, 255);
+                }
+            }
+            self.emit(frame);
+            std::thread::sleep(Duration::from_millis(16));
             return;
         }
 

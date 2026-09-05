@@ -17,6 +17,7 @@ packets it sends to your LED controller.
 * [Scripted effects](scripting.md)
 * [Output protocols](protocols.md)
 * [The layout model](layout.md)
+* [Camera discovery](discovery.md)
 * [Building from source](building.md)
 * [How it works](architecture.md)
 

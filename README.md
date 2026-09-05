@@ -39,7 +39,10 @@ MasLight decodes it and tone maps the highlights instead of clipping every
 bright scene to white.
 
 **Calibration.** A wizard that sends pure red and asks what colour the strip
-actually shows, so nobody has to guess whether their chip is GRB or RGB.
+actually shows, so nobody has to guess whether their chip is GRB or RGB. And
+one that finds the LEDs with a camera: photograph eight patterns and both the
+positions and the wiring order come out of the photographs, so nobody has to
+describe their strip at all.
 
 ## What it does
 
@@ -108,6 +111,7 @@ capture backend  ->  zone reducer  ->  colour pipeline  ->  sink
 | `maslight-rules` | Automatic profile switching and the platform probes it needs. |
 | `maslight-api` | The local REST and WebSocket server. |
 | `maslight-effects` | The sandboxed Rhai runtime for scripted effects. |
+| `maslight-calibrate` | Camera assisted position discovery and the homography it needs. |
 | `maslight-engine` | The loop, profiles, telemetry, latency compensation. |
 | `app/` | Tauri shell and the React interface. |
 
@@ -146,6 +150,7 @@ Being plain about this matters more than a longer feature list:
 * [Scripted effects](docs/scripting.md)
 * [Output protocols](docs/protocols.md)
 * [The layout model](docs/layout.md)
+* [Camera discovery](docs/discovery.md)
 * [Building from source](docs/building.md)
 * [How it works](docs/architecture.md)
 

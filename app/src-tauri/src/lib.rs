@@ -18,6 +18,7 @@ use tauri::{AppHandle, Emitter, Manager, State, WindowEvent};
 mod api_bridge;
 mod autostart;
 mod commands;
+mod discovery;
 
 /// State the interface, the tray and the API all share.
 ///
@@ -118,6 +119,10 @@ pub fn run() {
             commands::list_capture_backends,
             commands::list_audio_devices,
             commands::list_script_examples,
+            discovery::calibration_plan,
+            discovery::calibration_show,
+            discovery::calibration_release,
+            discovery::calibration_decode,
             commands::discover_devices,
             commands::probe_device,
             commands::build_layout,

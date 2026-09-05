@@ -27,6 +27,7 @@ maslight-capture = { workspace = true }
 maslight-engine = { workspace = true }
 maslight-api = { workspace = true }
 maslight-effects = { workspace = true }
+maslight-calibrate = { workspace = true }
 
 tauri = { version = "2", features = ["tray-icon"] }
 serde = { workspace = true }

@@ -14,7 +14,10 @@ import type {
   DiscoveredDevice,
   DisplayInfo,
   EngineStatus,
+  DecodeRequest,
+  DecodeResult,
   Layout,
+  PlanStep,
   ScriptExample,
   WizardParams,
 } from "./types";
@@ -47,6 +50,13 @@ export const api = {
   listCaptureBackends: () => call<BackendOption[]>("list_capture_backends"),
   listAudioDevices: () => call<string[]>("list_audio_devices"),
   listScriptExamples: () => call<ScriptExample[]>("list_script_examples"),
+  calibrationPlan: (ledCount: number) =>
+    call<PlanStep[]>("calibration_plan", { ledCount }),
+  calibrationShow: (ledCount: number, step: number) =>
+    call<void>("calibration_show", { ledCount, step }),
+  calibrationRelease: () => call<void>("calibration_release"),
+  calibrationDecode: (request: DecodeRequest) =>
+    call<DecodeResult>("calibration_decode", { request }),
   discoverDevices: (timeoutMs = 2500) =>
     call<DiscoveredDevice[]>("discover_devices", { timeoutMs }),
   probeDevice: (host: string) =>

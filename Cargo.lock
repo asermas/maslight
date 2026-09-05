@@ -2435,6 +2435,7 @@ name = "maslight-app"
 version = "0.1.0"
 dependencies = [
  "maslight-api",
+ "maslight-calibrate",
  "maslight-capture",
  "maslight-core",
  "maslight-effects",
@@ -2458,6 +2459,16 @@ dependencies = [
  "maslight-core",
  "parking_lot",
  "rustfft",
+ "serde",
+ "thiserror 2.0.20",
+ "tracing",
+]
+
+[[package]]
+name = "maslight-calibrate"
+version = "0.1.0"
+dependencies = [
+ "maslight-core",
  "serde",
  "thiserror 2.0.20",
  "tracing",

@@ -258,6 +258,28 @@ export interface DiscoveredDevice {
   kind: string;
 }
 
+export interface PlanStep {
+  index: number;
+  kind: "off" | "on" | "bit";
+  bit: number | null;
+}
+
+export interface DecodeRequest {
+  ledCount: number;
+  photos: { luma: string; width: number; height: number }[];
+  corners: [number, number][];
+  display: string;
+  depth?: number;
+  threshold?: number;
+}
+
+export interface DecodeResult {
+  layout: Layout;
+  found: number;
+  expected: number;
+  unassigned: number;
+}
+
 export interface ScriptExample {
   name: string;
   source: string;

@@ -268,6 +268,20 @@ export const mockBackend = {
   list_displays: async () => displays,
   list_capture_backends: async () => backends,
   list_audio_devices: async () => ["Speakers (demo)"],
+  calibration_plan: async () =>
+    Array.from({ length: 8 }, (_, index) => ({
+      index,
+      kind: index === 0 ? "off" : index === 1 ? "on" : "bit",
+      bit: index >= 2 ? index - 2 : null,
+    })),
+  calibration_show: async () => {},
+  calibration_release: async () => {},
+  calibration_decode: async () => ({
+    layout: current.profiles[0].layout,
+    found: current.profiles[0].layout.leds.length,
+    expected: current.profiles[0].layout.leds.length,
+    unassigned: 0,
+  }),
   list_script_examples: async () => [
     {
       name: "Rainbow",
