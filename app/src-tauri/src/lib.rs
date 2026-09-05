@@ -80,20 +80,83 @@ impl AppState {
     }
 }
 
+/// Send the log to a file as well as to the console.
+///
+/// A desktop application started from a shortcut, from the tray, or at login
+/// has no console to write to, so on Windows the log went nowhere at all and
+/// there was no way to find out why anything had happened. Keeping a file
+/// next to the configuration means somebody with dark lights can read what
+/// the application thought it was doing, and can send it to somebody else.
+///
+/// The console layer stays for anyone running it from a terminal. The
+/// returned guard has to stay alive for the process, or the last lines never
+/// reach the disk.
+fn start_logging() -> Option<tracing_appender::non_blocking::WorkerGuard> {
+    use tracing_subscriber::layer::SubscriberExt;
+    use tracing_subscriber::util::SubscriberInitExt;
+    // Brings with_filter onto the individual layers.
+    use tracing_subscriber::Layer as _;
+
+    let filter = || {
+        tracing_subscriber::EnvFilter::try_from_env("MASLIGHT_LOG")
+            .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"))
+    };
+
+    let dir = maslight_core::profile::config_dir();
+    let file = std::fs::create_dir_all(&dir).ok().and_then(|()| {
+        // Truncate rather than append: one launch is what somebody needs to
+        // read, and an unbounded log on a machine that starts at login is a
+        // problem of its own.
+        std::fs::File::create(dir.join("maslight.log")).ok()
+    });
+
+    match file {
+        Some(file) => {
+            let (writer, guard) = tracing_appender::non_blocking(file);
+            tracing_subscriber::registry()
+                .with(
+                    tracing_subscriber::fmt::layer()
+                        .with_ansi(false)
+                        .with_writer(writer)
+                        .with_filter(filter()),
+                )
+                .with(tracing_subscriber::fmt::layer().with_filter(filter()))
+                .init();
+            tracing::info!("MasLight {} starting", env!("CARGO_PKG_VERSION"));
+            Some(guard)
+        }
+        None => {
+            tracing_subscriber::fmt().with_env_filter(filter()).init();
+            None
+        }
+    }
+}
+
 /// Entry point shared by the desktop binary and any future embedder.
 pub fn run() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_env("MASLIGHT_LOG")
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
+    let _log = start_logging();
 
     let loaded = AppConfig::load_or_default();
     // Announce what happened here rather than inside the core crate, which has
     // no logging and no business deciding how a problem is reported.
+    let where_from = maslight_core::profile::config_path();
     match &loaded {
-        ConfigLoad::Loaded(_) | ConfigLoad::Fresh(_) => {}
+        ConfigLoad::Loaded(c) => {
+            tracing::info!(
+                "configuration read from {} ({} bytes on disk, {} profile(s))",
+                where_from.display(),
+                std::fs::metadata(&where_from).map(|m| m.len()).unwrap_or(0),
+                c.profiles.len()
+            );
+        }
+        // Worth saying out loud. Somebody whose settings have apparently
+        // vanished is usually looking at a different file than they think.
+        ConfigLoad::Fresh(_) => {
+            tracing::info!(
+                "no configuration at {}, starting from defaults",
+                where_from.display()
+            );
+        }
         ConfigLoad::Replaced { error, kept, .. } => {
             tracing::error!(
                 "the configuration is not valid json ({error}); it has been kept as {} and MasLight is starting from defaults",
@@ -124,6 +187,22 @@ pub fn run() {
             }
         }
     }
+    // One line that says what is about to run. Somebody reading this log
+    // because their lights are dark should not have to guess which profile
+    // was active or whether it had any LEDs in it.
+    {
+        let p = config.active();
+        tracing::info!(
+            "profile {:?} ({}), mode {:?}, {} leds, {} device(s), enabled {}",
+            p.name,
+            p.id,
+            p.mode,
+            p.layout.len(),
+            p.devices.len(),
+            config.enabled
+        );
+    }
+
     let start_minimised = config.ui.start_minimised;
     let state = AppState::new(config);
     {
