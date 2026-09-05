@@ -6,7 +6,15 @@ import {
 } from "@phosphor-icons/react";
 
 import { StripPreview } from "../components/preview";
-import { Alert, Badge, Card, EmptyState, Slider, Stat } from "../components/ui";
+import {
+  Alert,
+  Badge,
+  Card,
+  DeviceBadge,
+  EmptyState,
+  Slider,
+  Stat,
+} from "../components/ui";
 import type { Store } from "../lib/store";
 
 export function Dashboard({
@@ -106,11 +114,19 @@ export function Dashboard({
                   <div className="list-row-main">
                     <strong>{d.label}</strong>
                     {d.error && <div>{d.error}</div>}
+                    {!d.error && d.reachable === false && (
+                      <div>{t("devices.noAnswerHint")}</div>
+                    )}
                   </div>
-                  <Badge tone={d.connected ? "ok" : "bad"}>
-                    <span className="dot" />
-                    {d.connected ? t("common.on") : t("common.off")}
-                  </Badge>
+                  <DeviceBadge
+                    connected={d.connected}
+                    reachable={d.reachable}
+                    labels={{
+                      sending: t("devices.sending"),
+                      noAnswer: t("devices.noAnswer"),
+                      off: t("common.off"),
+                    }}
+                  />
                 </div>
               ))}
               {(status?.devices?.length ?? 0) === 0 &&

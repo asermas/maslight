@@ -173,6 +173,46 @@ export function Badge({
   return <span className={cls}>{children}</span>;
 }
 
+/**
+ * Health of one output device.
+ *
+ * A UDP sink cannot know whether anything is listening, so "sending" and
+ * "reachable" are two different claims and the badge only makes the one it
+ * can support.
+ */
+export function DeviceBadge({
+  connected,
+  reachable,
+  labels,
+}: {
+  connected: boolean;
+  reachable: boolean | null;
+  labels: { sending: string; noAnswer: string; off: string };
+}) {
+  if (!connected) {
+    return (
+      <Badge tone="bad">
+        <span className="dot" />
+        {labels.off}
+      </Badge>
+    );
+  }
+  if (reachable === false) {
+    return (
+      <Badge tone="warn">
+        <span className="dot" />
+        {labels.noAnswer}
+      </Badge>
+    );
+  }
+  return (
+    <Badge tone="ok">
+      <span className="dot" />
+      {labels.sending}
+    </Badge>
+  );
+}
+
 export function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (
     <div className="stat">

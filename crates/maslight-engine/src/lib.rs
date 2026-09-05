@@ -231,6 +231,7 @@ impl Worker {
                     device_status.push(DeviceStatus {
                         label: sink.label(),
                         connected: true,
+                        reachable: probe_reachable(device),
                         error: None,
                     });
                     self.sinks.push(sink);
@@ -240,6 +241,7 @@ impl Worker {
                     device_status.push(DeviceStatus {
                         label: device.label(),
                         connected: false,
+                        reachable: None,
                         error: Some(e.to_string()),
                     });
                 }
@@ -543,6 +545,21 @@ impl Worker {
 enum ControlFlow {
     Continue,
     Stop,
+}
+
+/// Ask a networked controller whether it is actually there.
+///
+/// Only done when the configuration changes, never in the frame loop: it is a
+/// blocking HTTP request to a device on the local network, and the answer only
+/// changes when someone unplugs something.
+fn probe_reachable(device: &DeviceConfig) -> Option<bool> {
+    let host = match device {
+        DeviceConfig::Wled { host, .. } | DeviceConfig::Ddp { host, .. } => host,
+        _ => return None,
+    };
+    Some(
+        maslight_output::discovery::query_wled_info(host, Duration::from_millis(600)).is_some(),
+    )
 }
 
 /// Displays visible to a capture backend, for the setup wizard.

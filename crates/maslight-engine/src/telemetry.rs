@@ -11,7 +11,14 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct DeviceStatus {
     pub label: String,
+    /// The transport is open and frames are being written to it.
+    ///
+    /// For UDP this is not proof that anything is listening: a datagram sent
+    /// into the void succeeds. Reachability is reported separately.
     pub connected: bool,
+    /// Whether the controller answered when we last asked it about itself.
+    /// `None` means the question does not apply to this transport.
+    pub reachable: Option<bool>,
     pub error: Option<String>,
 }
 

@@ -118,6 +118,10 @@ const en = {
   "devices.probe": "Check",
   "devices.ledCount": "LEDs reported",
   "devices.useIt": "Use this controller",
+  "devices.sending": "Sending",
+  "devices.noAnswer": "No answer",
+  "devices.noAnswerHint":
+    "Frames are going out, but the controller is not answering on the network. Check that it is powered and on the same subnet.",
   "devices.notFound": "Nothing answered on the network",
   "devices.notFoundBody":
     "Controllers only answer over mDNS on the same subnet. Adding the address by hand always works.",
@@ -332,6 +336,10 @@ const tr: Record<keyof typeof en, string> = {
   "devices.probe": "Kontrol et",
   "devices.ledCount": "Bildirilen LED",
   "devices.useIt": "Bu kontrolcüyü kullan",
+  "devices.sending": "Gönderiliyor",
+  "devices.noAnswer": "Cevap yok",
+  "devices.noAnswerHint":
+    "Kareler gönderiliyor ama kontrolcü ağda cevap vermiyor. Güç verildiğinden ve aynı ağ bloğunda olduğundan emin ol.",
   "devices.notFound": "Ağda cevap veren olmadı",
   "devices.notFoundBody":
     "Kontrolcüler mDNS ile sadece aynı ağ bloğunda cevap verir. Adresi elle eklemek her zaman çalışır.",

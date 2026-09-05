@@ -153,7 +153,12 @@ function status(): EngineStatus {
       ? Array.from({ length: count }, (_, i) => hue(t + i / count))
       : Array.from({ length: count }, () => ({ r: 0, g: 0, b: 0 })),
     devices: [
-      { label: "WLED 192.168.0.200", connected: true, error: null },
+      {
+        label: "WLED 192.168.0.200",
+        connected: true,
+        reachable: true,
+        error: null,
+      },
     ],
     captureBackend: "Demo",
     display: "mock-1",

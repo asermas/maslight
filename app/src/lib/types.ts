@@ -178,7 +178,10 @@ export interface AppConfig {
 
 export interface DeviceStatus {
   label: string;
+  /** The transport is open. For UDP this is not proof anything is listening. */
   connected: boolean;
+  /** Whether the controller answered when last asked. Null when not applicable. */
+  reachable: boolean | null;
   error: string | null;
 }
 

@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { MagnifyingGlass, Plugs, Trash } from "@phosphor-icons/react";
 
-import { Badge, Card, EmptyState, Field, NumberInput } from "../components/ui";
+import {
+  Card,
+  DeviceBadge,
+  EmptyState,
+  Field,
+  NumberInput,
+} from "../components/ui";
 import { api, errorText } from "../lib/api";
 import type { Store } from "../lib/store";
 import type {
@@ -122,10 +128,15 @@ export function Devices({ store }: { store: Store }) {
                     </div>
                   </div>
                   {live && (
-                    <Badge tone={live.connected ? "ok" : "bad"}>
-                      <span className="dot" />
-                      {live.connected ? t("common.on") : t("common.off")}
-                    </Badge>
+                    <DeviceBadge
+                      connected={live.connected}
+                      reachable={live.reachable}
+                      labels={{
+                        sending: t("devices.sending"),
+                        noAnswer: t("devices.noAnswer"),
+                        off: t("common.off"),
+                      }}
+                    />
                   )}
                   <button
                     className="btn btn-sm btn-danger"
