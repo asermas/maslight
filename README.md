@@ -66,9 +66,11 @@ describe their strip at all.
   you turn it on.
 * **Scripted effects** in a sandbox that cannot reach your files, your network,
   or hang the lights.
-* **Light on the machine.** A still screen drops the capture rate on its own,
-  and even at full speed the readback is a small image rather than a whole
-  desktop.
+* **Light on the machine.** Reduction and the colour pipeline cost 0.035 ms a
+  frame for a 1080p screen and 60 LEDs, which is 0.2% of one core at 60 fps.
+  A still screen drops the capture rate on its own, and even at full speed the
+  readback is a small image rather than a whole desktop. Measure it yourself
+  with `cargo run --release -p maslight-core --example bench`.
 * **Nothing leaves your machine.** No account, no analytics, no crash
   reporting. Update checking is off by default.
 

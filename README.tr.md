@@ -64,7 +64,10 @@ kimsenin şeridini tarif etmesi gerekmiyor.
   açana kadar kapalı.
 * **Script efektleri**: dosyalarına, ağına erişemeyen ve ışıkları
   kilitleyemeyen bir sandbox içinde.
-* **Sisteme yük olmuyor.** Sabit ekranda yakalama hızı kendiliğinden düşüyor;
+* **Sisteme yük olmuyor.** 1080p ekran ve 60 LED için indirgeme ve renk hattı
+  kare başına 0.035 ms, yani 60 fps'te bir çekirdeğin %0.2'si. Kendin ölçmek
+  için: `cargo run --release -p maslight-core --example bench`.
+  Sabit ekranda yakalama hızı kendiliğinden düşüyor;
   tam hızda bile geri okunan şey masaüstünün tamamı değil, küçük bir görüntü.
 * **Hiçbir şey makineden çıkmıyor.** Hesap yok, analitik yok, çökme raporu yok.
   Güncelleme kontrolü varsayılan olarak kapalı.

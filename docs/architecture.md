@@ -86,6 +86,52 @@ Adaptive pacing watches whether anything changed. After a second of a still
 screen the capture rate drops to the idle setting and returns the moment
 something moves.
 
+## What a frame costs
+
+Numbers rather than adjectives. Measured on this machine with
+
+```text
+cargo run --release -p maslight-core --example bench
+```
+
+so anyone can re-run it and disagree with a number instead of a claim.
+
+Reduction, the cost of sampling the screen:
+
+| Resolution | 60 LEDs | 120 LEDs | 300 LEDs |
+|------------|---------|----------|----------|
+| 1920x1080  | 0.016 ms | 0.035 ms | 0.095 ms |
+| 2560x1440  | 0.021 ms | 0.042 ms | 0.086 ms |
+| 3840x2160  | 0.026 ms | 0.049 ms | 0.123 ms |
+
+Read the table across, not down. Going from 1080p to 4K is four times the
+pixels and costs about 1.5 times as much, because the reducer takes a fixed
+grid of taps per LED. Going from 60 LEDs to 300 is five times the work and
+costs about five times as much. **Cost tracks LED count, not resolution.**
+
+The colour pipeline, with every stage switched on, which is the worst case
+rather than the default:
+
+| LEDs | Per frame |
+|------|-----------|
+| 60   | 0.019 ms  |
+| 300  | 0.098 ms  |
+| 1200 | 0.375 ms  |
+
+Letterbox detection, which only runs when it is enabled, is 0.013 ms at 1080p.
+
+Together, for a real configuration:
+
+| Configuration | Per frame | One core at 60 fps |
+|---------------|-----------|--------------------|
+| 1920x1080, 60 LEDs   | 0.035 ms | 0.21% |
+| 3840x2160, 1200 LEDs | 0.498 ms | 2.99% |
+
+That is everything after the frame arrives. Capture and readback are on top and
+are the larger half, which is why the GPU downscale above matters more than any
+of these numbers: it is the one part of the pipeline that scales with the
+screen rather than with the strip.
+
 ## Testing
 
 * Colour pipeline: fifteen tests including frame rate independence, dithering
