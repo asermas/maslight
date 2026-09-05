@@ -60,6 +60,8 @@ actually shows, so nobody has to guess whether their chip is GRB or RGB.
   fullscreen, a time range, or running on battery.
 * **A local REST and WebSocket API**, on loopback, behind a token, off until
   you turn it on.
+* **Scripted effects** in a sandbox that cannot reach your files, your network,
+  or hang the lights.
 * **Light on the machine.** A still screen drops the capture rate on its own,
   and even at full speed the readback is a small image rather than a whole
   desktop.
@@ -105,6 +107,7 @@ capture backend  ->  zone reducer  ->  colour pipeline  ->  sink
 | `maslight-audio` | Loopback capture, spectrum analysis, beat detection, effects. |
 | `maslight-rules` | Automatic profile switching and the platform probes it needs. |
 | `maslight-api` | The local REST and WebSocket server. |
+| `maslight-effects` | The sandboxed Rhai runtime for scripted effects. |
 | `maslight-engine` | The loop, profiles, telemetry, latency compensation. |
 | `app/` | Tauri shell and the React interface. |
 
@@ -140,6 +143,7 @@ Being plain about this matters more than a longer feature list:
 * [Linux: X11 and Wayland](docs/linux.md)
 * [The audio mode](docs/audio.md)
 * [The local API](docs/api.md)
+* [Scripted effects](docs/scripting.md)
 * [Output protocols](docs/protocols.md)
 * [The layout model](docs/layout.md)
 * [Building from source](docs/building.md)

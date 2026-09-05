@@ -237,8 +237,10 @@ pub struct Profile {
     pub color: ColorSettings,
     pub capture: CaptureSettings,
     pub audio: AudioSettings,
-    /// Colour shown in [`LightMode::Effect`].
+    /// Colour shown in [`LightMode::Effect`] when no script is set.
     pub effect_color: crate::types::Rgb8,
+    /// Rhai source for [`LightMode::Effect`]. Empty means the static colour.
+    pub script: String,
     pub devices: Vec<DeviceConfig>,
     /// Extra delay in milliseconds applied before sending, so the strip and
     /// the panel change at the same instant. Measured by the wizard.
@@ -258,6 +260,7 @@ impl Default for Profile {
             capture: CaptureSettings::default(),
             audio: AudioSettings::default(),
             effect_color: crate::types::Rgb8::new(255, 170, 90),
+            script: String::new(),
             devices: Vec::new(),
             latency_ms: 0,
             audio_blend: 0.0,

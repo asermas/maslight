@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Broadcast,
+  Code,
   Crosshair,
   Gauge,
   GridFour,
@@ -10,11 +11,14 @@ import {
 } from "@phosphor-icons/react";
 
 import { Badge, Mark, Toggle } from "./components/ui";
+import { api } from "./lib/api";
 import { useMasLight } from "./lib/store";
+import type { ScriptExample } from "./lib/types";
 import { Calibration } from "./screens/Calibration";
 import { Dashboard } from "./screens/Dashboard";
 import { Devices } from "./screens/Devices";
 import { LayoutStudio } from "./screens/LayoutStudio";
+import { Developer } from "./screens/Developer";
 import { Rules } from "./screens/Rules";
 import { Settings } from "./screens/Settings";
 import { Studio } from "./screens/Studio";
@@ -27,6 +31,7 @@ type Screen =
   | "calibration"
   | "studio"
   | "rules"
+  | "developer"
   | "settings";
 
 const NAV: { id: Screen; key: MessageKey; icon: typeof Gauge }[] = [
@@ -36,12 +41,18 @@ const NAV: { id: Screen; key: MessageKey; icon: typeof Gauge }[] = [
   { id: "calibration", key: "nav.calibration", icon: Crosshair },
   { id: "studio", key: "nav.studio", icon: SlidersHorizontal },
   { id: "rules", key: "nav.rules", icon: TreeStructure },
+  { id: "developer", key: "nav.developer", icon: Code },
   { id: "settings", key: "nav.settings", icon: Wrench },
 ];
 
 export default function App() {
   const store = useMasLight();
   const [screen, setScreen] = useState<Screen>("dashboard");
+  const [examples, setExamples] = useState<ScriptExample[]>([]);
+
+  useEffect(() => {
+    api.listScriptExamples().then(setExamples).catch(() => setExamples([]));
+  }, []);
   const { t, config, status, loading, error } = store;
 
   if (loading) {
@@ -180,6 +191,9 @@ export default function App() {
           {screen === "calibration" && <Calibration store={store} />}
           {screen === "studio" && <Studio store={store} />}
           {screen === "rules" && <Rules store={store} />}
+          {screen === "developer" && (
+            <Developer store={store} examples={examples} />
+          )}
           {screen === "settings" && <Settings store={store} />}
         </div>
       </main>

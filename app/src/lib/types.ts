@@ -165,6 +165,7 @@ export interface Profile {
   capture: CaptureSettings;
   audio: AudioSettings;
   effectColor: Rgb8;
+  script: string;
   devices: DeviceConfig[];
   latencyMs: number;
   audioBlend: number;
@@ -230,6 +231,7 @@ export interface EngineStatus {
   audioActive: boolean;
   audioEnergy: number;
   ruleSwitched: boolean;
+  scriptError: string | null;
   ruleFullscreen: boolean;
   ruleOnBattery: boolean;
   ruleMinutes: number;
@@ -254,6 +256,11 @@ export interface DiscoveredDevice {
   ledCount: number | null;
   version: string | null;
   kind: string;
+}
+
+export interface ScriptExample {
+  name: string;
+  source: string;
 }
 
 export interface BackendOption {

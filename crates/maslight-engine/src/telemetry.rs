@@ -55,6 +55,8 @@ pub struct EngineStatus {
     pub audio_energy: f32,
     /// The active profile was last chosen by a rule rather than by hand.
     pub rule_switched: bool,
+    /// Why the effect script is not running, when it is not.
+    pub script_error: Option<String>,
     /// What the rule sampler last saw, so the rules screen can show why a
     /// rule is or is not firing.
     pub rule_fullscreen: bool,
@@ -88,6 +90,7 @@ impl Default for EngineStatus {
             audio_active: false,
             audio_energy: 0.0,
             rule_switched: false,
+            script_error: None,
             rule_fullscreen: false,
             rule_on_battery: false,
             rule_minutes: 0,

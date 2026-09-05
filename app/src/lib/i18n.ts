@@ -15,6 +15,7 @@ const en = {
   "nav.calibration": "Calibration",
   "nav.studio": "Studio",
   "nav.rules": "Rules",
+  "nav.developer": "Developer",
   "nav.settings": "Settings",
 
   "common.on": "On",
@@ -211,6 +212,29 @@ const en = {
   "studio.grid": "Sampling grid",
   "studio.gridHint": "Taps per LED are the square of this. 16 is plenty.",
 
+  "dev.title": "Scripted effect",
+  "dev.body":
+    "A small program that returns one colour per LED. It runs where the screen or the music would, so brightness, white balance and the current limit still apply to whatever it draws.",
+  "dev.run": "Run",
+  "dev.running": "Running",
+  "dev.load": "Load",
+  "dev.examples": "Examples",
+  "dev.reference": "What a script can use",
+  "dev.placeholder": "fn render(ctx) { ... }",
+  "dev.refN": "LEDs in the chain",
+  "dev.refT": "Seconds since the effect started",
+  "dev.refDt": "Seconds since the last frame",
+  "dev.refEnergy": "Audio loudness, 0 to 1",
+  "dev.refBeat": "True on a beat",
+  "dev.refPulse": "Fades from 1 after each beat",
+  "dev.refBands": "Audio levels per band",
+  "dev.refHsv": "Colour from hue, saturation, value",
+  "dev.refRgb": "Colour from three channels",
+  "dev.refMix": "Blend between two numbers",
+  "dev.refWave": "A sine from 0 to 1",
+  "dev.refClamp": "Hold a number inside 0 to 1",
+  "dev.sandbox":
+    "Scripts have no file, network or process access, and one frame is capped so a runaway loop costs a dark frame rather than the lights.",
   "rules.title": "Rules",
   "rules.body":
     "Switch profiles automatically. Rules are checked in order and the first match wins.",
@@ -283,6 +307,7 @@ const tr: Record<keyof typeof en, string> = {
   "nav.calibration": "Kalibrasyon",
   "nav.studio": "Stüdyo",
   "nav.rules": "Kurallar",
+  "nav.developer": "Geliştirici",
   "nav.settings": "Ayarlar",
 
   "common.on": "Açık",
@@ -479,6 +504,29 @@ const tr: Record<keyof typeof en, string> = {
   "studio.gridHint":
     "LED başına örneklem bunun karesi kadar. 16 fazlasıyla yeter.",
 
+  "dev.title": "Script efekti",
+  "dev.body":
+    "Her LED için bir renk döndüren küçük bir program. Ekranın ya da müziğin yerinde çalışır; parlaklık, beyaz dengesi ve akım sınırı çizdiği şeye de uygulanır.",
+  "dev.run": "Çalıştır",
+  "dev.running": "Çalışıyor",
+  "dev.load": "Yükle",
+  "dev.examples": "Örnekler",
+  "dev.reference": "Script neleri kullanabilir",
+  "dev.placeholder": "fn render(ctx) { ... }",
+  "dev.refN": "Zincirdeki LED sayısı",
+  "dev.refT": "Efekt başladığından beri saniye",
+  "dev.refDt": "Son kareden beri saniye",
+  "dev.refEnergy": "Ses yüksekliği, 0 ile 1 arası",
+  "dev.refBeat": "Beat anında doğru",
+  "dev.refPulse": "Her beat sonrası 1'den söner",
+  "dev.refBands": "Bant başına ses seviyeleri",
+  "dev.refHsv": "Ton, doygunluk, parlaklıktan renk",
+  "dev.refRgb": "Üç kanaldan renk",
+  "dev.refMix": "İki sayı arasında karışım",
+  "dev.refWave": "0 ile 1 arası sinüs",
+  "dev.refClamp": "Sayıyı 0 ile 1 arasında tut",
+  "dev.sandbox":
+    "Scriptlerin dosya, ağ ve süreç erişimi yoktur; bir kare sınırlıdır, kaçak bir döngü ışıkları değil sadece o kareyi karartır.",
   "rules.title": "Kurallar",
   "rules.body":
     "Profilleri otomatik değiştir. Kurallar sırayla kontrol edilir, ilk eşleşen kazanır.",

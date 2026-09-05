@@ -117,6 +117,7 @@ pub fn run() {
             commands::list_displays,
             commands::list_capture_backends,
             commands::list_audio_devices,
+            commands::list_script_examples,
             commands::discover_devices,
             commands::probe_device,
             commands::build_layout,

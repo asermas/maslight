@@ -59,6 +59,8 @@ etmek zorunda kalmıyor.
   şey, saat aralığı ya da pilde olmak.
 * **Yerel REST ve WebSocket API**: loopback üzerinde, token arkasında, sen
   açana kadar kapalı.
+* **Script efektleri**: dosyalarına, ağına erişemeyen ve ışıkları
+  kilitleyemeyen bir sandbox içinde.
 * **Sisteme yük olmuyor.** Sabit ekranda yakalama hızı kendiliğinden düşüyor;
   tam hızda bile geri okunan şey masaüstünün tamamı değil, küçük bir görüntü.
 * **Hiçbir şey makineden çıkmıyor.** Hesap yok, analitik yok, çökme raporu yok.
@@ -103,6 +105,7 @@ yakalama arka ucu -> bölge indirgeyici -> renk hattı -> çıkış
 | `maslight-audio` | Loopback yakalama, spektrum analizi, beat tespiti, efektler. |
 | `maslight-rules` | Otomatik profil değişimi ve gereken platform sondaları. |
 | `maslight-api` | Yerel REST ve WebSocket sunucusu. |
+| `maslight-effects` | Script efektleri için sandbox'lı Rhai çalışma zamanı. |
 | `maslight-engine` | Döngü, profiller, telemetri, gecikme telafisi. |
 | `app/` | Tauri kabuğu ve React arayüzü. |
 
@@ -137,6 +140,7 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 * [Linux: X11 ve Wayland](docs/linux.md)
 * [Ses modu](docs/audio.md)
 * [Yerel API](docs/api.md)
+* [Script efektleri](docs/scripting.md)
 * [Çıkış protokolleri](docs/protocols.md)
 * [Yerleşim modeli](docs/layout.md)
 * [Kaynaktan derleme](docs/building.md)

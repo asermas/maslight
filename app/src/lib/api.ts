@@ -15,6 +15,7 @@ import type {
   DisplayInfo,
   EngineStatus,
   Layout,
+  ScriptExample,
   WizardParams,
 } from "./types";
 
@@ -45,6 +46,7 @@ export const api = {
     call<DisplayInfo[]>("list_displays", { backend: backend ?? null }),
   listCaptureBackends: () => call<BackendOption[]>("list_capture_backends"),
   listAudioDevices: () => call<string[]>("list_audio_devices"),
+  listScriptExamples: () => call<ScriptExample[]>("list_script_examples"),
   discoverDevices: (timeoutMs = 2500) =>
     call<DiscoveredDevice[]>("discover_devices", { timeoutMs }),
   probeDevice: (host: string) =>

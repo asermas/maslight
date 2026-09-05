@@ -1,0 +1,19 @@
+[package]
+name = "maslight-effects"
+description = "MasLight scripted effects, sandboxed"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+maslight-core = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+# `no_module`, `no_custom_syntax` and `no_closure` are off deliberately: the
+# sandbox is the point, and every feature that is not needed is one less thing
+# a script can reach for.
+rhai = { version = "1.26", default-features = false, features = ["std", "sync", "only_i64", "f32_float"] }

@@ -87,6 +87,25 @@ pub fn list_capture_backends() -> Vec<BackendOption> {
         .collect()
 }
 
+/// Scripts shipped with the app, as a starting point for the editor.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScriptExample {
+    pub name: String,
+    pub source: String,
+}
+
+#[tauri::command]
+pub fn list_script_examples() -> Vec<ScriptExample> {
+    maslight_effects::examples()
+        .into_iter()
+        .map(|(name, source)| ScriptExample {
+            name: name.to_string(),
+            source: source.to_string(),
+        })
+        .collect()
+}
+
 /// Audio devices the audio mode can listen to.
 #[tauri::command]
 pub fn list_audio_devices() -> Vec<String> {

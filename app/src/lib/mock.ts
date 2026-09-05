@@ -101,6 +101,7 @@ const config: AppConfig = {
         rgbwMode: "none",
       },
       effectColor: { r: 255, g: 170, b: 90 },
+      script: "",
       audio: {
         device: null,
         bands: 16,
@@ -184,6 +185,7 @@ function status(): EngineStatus {
     audioActive: false,
     audioEnergy: 0,
     ruleSwitched: false,
+    scriptError: null,
     ruleFullscreen: false,
     ruleOnBattery: false,
     ruleMinutes: 9 * 60 + 30,
@@ -266,6 +268,21 @@ export const mockBackend = {
   list_displays: async () => displays,
   list_capture_backends: async () => backends,
   list_audio_devices: async () => ["Speakers (demo)"],
+  list_script_examples: async () => [
+    {
+      name: "Rainbow",
+      source: [
+        "fn render(ctx) {",
+        "    let out = [];",
+        "    for i in 0..ctx.n {",
+        "        let h = i.to_float() / ctx.n.to_float() + ctx.t * 0.08;",
+        "        out.push(hsv(h, 1.0, 1.0));",
+        "    }",
+        "    out",
+        "}",
+      ].join("\n"),
+    },
+  ],
   discover_devices: async () => discovered,
   probe_device: async () => discovered[0],
   build_layout: async (args: { params: WizardParams }) =>

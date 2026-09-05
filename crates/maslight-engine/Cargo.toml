@@ -14,6 +14,7 @@ maslight-output = { workspace = true }
 maslight-capture = { workspace = true }
 maslight-audio = { workspace = true }
 maslight-rules = { workspace = true }
+maslight-effects = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

@@ -21,6 +21,7 @@ use maslight_core::{
     AppConfig, ColorPipeline, DeviceConfig, Insets, LedFrame, LightMode, Profile, Rect, Reducer,
     Rgb, Rgb8,
 };
+use maslight_effects::{EffectContext, EffectScript};
 use maslight_output::{make_sink, Sink};
 use maslight_rules::RuleWatcher;
 use parking_lot::RwLock;
@@ -149,6 +150,9 @@ struct Worker {
     /// Automatic profile switching. Polls the system every couple of seconds
     /// and only speaks up when the answer changes.
     rules: RuleWatcher,
+    /// The compiled effect script, when the active profile has one.
+    script: Option<EffectScript>,
+    script_scratch: Vec<Rgb>,
     hold: Option<Rgb8>,
     identify_until: Option<(usize, Instant)>,
     dirty: bool,
@@ -176,6 +180,8 @@ impl Worker {
             audio: None,
             audio_scratch: Vec::new(),
             rules: RuleWatcher::default(),
+            script: None,
+            script_scratch: Vec::new(),
             hold: None,
             identify_until: None,
             dirty: true,
@@ -258,6 +264,26 @@ impl Worker {
                         reachable: None,
                         error: Some(e.to_string()),
                     });
+                }
+            }
+        }
+
+        // --- script ---
+        // Recompiled only when the source actually changes, so editing another
+        // setting does not restart the effect clock.
+        let source = profile.script.trim();
+        if source.is_empty() {
+            self.script = None;
+            self.status.write().script_error = None;
+        } else if self.script.as_ref().map(|s| s.source()) != Some(profile.script.as_str()) {
+            match EffectScript::compile(&profile.script) {
+                Ok(script) => {
+                    self.script = Some(script);
+                    self.status.write().script_error = None;
+                }
+                Err(e) => {
+                    self.script = None;
+                    self.status.write().script_error = Some(e.to_string());
                 }
             }
         }
@@ -399,8 +425,32 @@ impl Worker {
         }
 
         if profile.mode == LightMode::Effect {
+            let len = profile.layout.len();
+            if let Some(script) = &mut self.script {
+                let audio = self.audio.as_ref().map(|a| a.spectrum().clone());
+                let context = EffectContext {
+                    n: len,
+                    t: 0.0,
+                    dt,
+                    energy: audio.as_ref().map(|s| s.energy).unwrap_or(0.0),
+                    beat: audio.as_ref().map(|s| s.beat).unwrap_or(false),
+                    beat_envelope: audio.as_ref().map(|s| s.beat_envelope).unwrap_or(0.0),
+                    bands: audio.map(|s| s.bands).unwrap_or_default(),
+                };
+                script.render(&context, &mut self.script_scratch);
+                let error = script.error().map(str::to_string);
+                self.status.write().script_error = error;
+                let frame = self.pipeline.process(&self.script_scratch, dt);
+                self.emit(frame);
+                // A script runs at the profile frame rate, which is what makes
+                // motion smooth rather than stepping.
+                let budget =
+                    Duration::from_secs_f32(1.0 / profile.capture.target_fps.max(1) as f32);
+                std::thread::sleep(budget);
+                return;
+            }
             let frame = LedFrame {
-                rgb: vec![profile.effect_color; profile.layout.len()],
+                rgb: vec![profile.effect_color; len],
                 white: Vec::new(),
             };
             self.emit(frame);
