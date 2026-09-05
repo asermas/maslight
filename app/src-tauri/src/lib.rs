@@ -238,7 +238,12 @@ pub fn run() {
             commands::open_config_dir,
         ])
         .setup(move |app| {
-            build_tray(app.handle())?;
+            // A missing tray is a degraded application, not a dead one.
+            // Failing setup here would leave somebody with no window either,
+            // and nothing on screen to explain why.
+            if let Err(e) = build_tray(app.handle()) {
+                tracing::error!("could not build the tray icon: {e}");
+            }
             if let Some(window) = app.get_webview_window("main") {
                 if start_minimised {
                     let _ = window.hide();
@@ -268,9 +273,16 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &toggle, &separator, &quit])?;
 
-    TrayIconBuilder::with_id("maslight")
-        .icon(app.default_window_icon().cloned().unwrap())
-        .tooltip("MasLight")
+    // The icon is whatever the bundle gave the window. If a build ever ships
+    // without one, a tray with no picture is a much better outcome than the
+    // whole application panicking on the way up.
+    let mut tray = TrayIconBuilder::with_id("maslight");
+    match app.default_window_icon().cloned() {
+        Some(icon) => tray = tray.icon(icon),
+        None => tracing::warn!("no window icon in this build, the tray will have none"),
+    }
+
+    tray.tooltip("MasLight")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {
