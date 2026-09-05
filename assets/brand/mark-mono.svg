@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="MasLight">
+  <title>MasLight</title>
+  <path d="M56 188 V72 L128 142 L200 72 V188"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="26"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <circle cx="56"  cy="220" r="12" fill="currentColor"/>
+  <circle cx="128" cy="220" r="12" fill="currentColor"/>
+  <circle cx="200" cy="220" r="12" fill="currentColor"/>
+</svg>

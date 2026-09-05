@@ -1,0 +1,7 @@
+title: MasLight
+description: Open source ambilight for every screen
+theme: jekyll-theme-minimal
+show_downloads: false
+markdown: kramdown
+exclude:
+  - "*.rs"

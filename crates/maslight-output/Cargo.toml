@@ -1,0 +1,25 @@
+[package]
+name = "maslight-output"
+description = "MasLight output transports: WLED UDP, DDP, sACN, Art-Net and serial"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+default = ["discovery"]
+# mDNS discovery of WLED controllers on the local network.
+discovery = ["dep:mdns-sd"]
+# Direct serial output. Off by default so the core build needs no libudev.
+serial = ["dep:serialport"]
+
+[dependencies]
+maslight-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+mdns-sd = { version = "0.14", optional = true }
+serialport = { version = "4.7", optional = true, default-features = false }

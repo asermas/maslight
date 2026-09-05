@@ -1,0 +1,40 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/maslight-core",
+    "crates/maslight-output",
+    "crates/maslight-capture",
+    "crates/maslight-engine",
+    "app/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+license = "MIT"
+repository = "https://github.com/maslight/maslight"
+homepage = "https://github.com/maslight/maslight"
+authors = ["MasLight contributors"]
+
+[workspace.dependencies]
+maslight-core = { path = "crates/maslight-core", version = "0.1.0" }
+maslight-output = { path = "crates/maslight-output", version = "0.1.0" }
+maslight-capture = { path = "crates/maslight-capture", version = "0.1.0" }
+maslight-engine = { path = "crates/maslight-engine", version = "0.1.0" }
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+parking_lot = "0.12"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1

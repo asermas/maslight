@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="MasLight, open source ambilight for every screen">
+  <title>MasLight</title>
+  <defs>
+    <linearGradient id="strip" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0.00" stop-color="#FF4D4D"/>
+      <stop offset="0.25" stop-color="#FFD54D"/>
+      <stop offset="0.50" stop-color="#4DFF9E"/>
+      <stop offset="0.75" stop-color="#4DA6FF"/>
+      <stop offset="1.00" stop-color="#B44DFF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="320" fill="#08090A"/>
+  <rect y="312" width="1280" height="8" fill="url(#strip)"/>
+
+  <g transform="translate(96 84) scale(0.6)">
+    <path d="M56 188 V72 L128 142 L200 72 V188"
+          fill="none" stroke="#F5F7FA" stroke-width="26"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="56"  cy="220" r="12" fill="#FF4D4D"/>
+    <circle cx="128" cy="220" r="12" fill="#4DFF9E"/>
+    <circle cx="200" cy="220" r="12" fill="#4DA6FF"/>
+  </g>
+
+  <text x="272" y="152"
+        font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif"
+        font-size="72" letter-spacing="-2.5" fill="#F7F8F8">
+    <tspan font-weight="700">Mas</tspan><tspan font-weight="300">Light</tspan>
+  </text>
+  <text x="276" y="200"
+        font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif"
+        font-size="24" letter-spacing="-0.3" fill="#8A8F98">
+    Open source ambilight for every screen
+  </text>
+</svg>

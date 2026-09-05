@@ -1,0 +1,37 @@
+[package]
+name = "maslight-app"
+description = "MasLight desktop application"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+name = "maslight_app"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = []
+# Direct serial output. Needs libudev on Linux, so it is opt in.
+serial = ["maslight-output/serial"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+maslight-core = { workspace = true }
+maslight-output = { workspace = true }
+maslight-capture = { workspace = true }
+maslight-engine = { workspace = true }
+
+tauri = { version = "2", features = ["tray-icon"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+parking_lot = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-registry = "0.6"

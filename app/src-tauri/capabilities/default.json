@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Window, tray and the MasLight commands. Nothing that reaches outside the app.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
