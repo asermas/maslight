@@ -11,7 +11,10 @@ Fedora and most current desktops boot into by default.
 
 ## X11 sessions
 
-Fully supported and this is the tested path.
+Fully supported. The backend is exercised for real in continuous integration:
+a job under Xvfb paints the root window red, captures it, and asserts the
+reducer sees red rather than some other channel. Nobody has yet watched it
+drive a physical strip on a physical desktop, which is the one gap left.
 
 MasLight uses the MIT-SHM extension: the X server writes each frame into a
 shared memory segment instead of pushing it down the socket, and MasLight then

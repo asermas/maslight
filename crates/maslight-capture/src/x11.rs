@@ -125,30 +125,29 @@ impl X11Backend {
     /// Monitors reported by RandR, falling back to the whole root window.
     fn monitors(&self) -> Vec<DisplayInfo> {
         let mut out = Vec::new();
-        if let Ok(reply) = self
+        let monitors = self
             .conn
             .randr_get_monitors(self.root, true)
-            .and_then(|c| Ok(c.reply()))
-        {
-            if let Ok(monitors) = reply {
-                for (i, m) in monitors.monitors.iter().enumerate() {
-                    let name = self
-                        .conn
-                        .get_atom_name(m.name)
-                        .ok()
-                        .and_then(|c| c.reply().ok())
-                        .map(|r| String::from_utf8_lossy(&r.name).to_string())
-                        .unwrap_or_else(|| format!("output-{i}"));
-                    out.push(DisplayInfo {
-                        id: name.clone(),
-                        label: name,
-                        width: m.width as u32,
-                        height: m.height as u32,
-                        x: m.x as i32,
-                        y: m.y as i32,
-                        primary: m.primary,
-                    });
-                }
+            .ok()
+            .and_then(|cookie| cookie.reply().ok());
+        if let Some(monitors) = monitors {
+            for (i, m) in monitors.monitors.iter().enumerate() {
+                let name = self
+                    .conn
+                    .get_atom_name(m.name)
+                    .ok()
+                    .and_then(|c| c.reply().ok())
+                    .map(|r| String::from_utf8_lossy(&r.name).to_string())
+                    .unwrap_or_else(|| format!("output-{i}"));
+                out.push(DisplayInfo {
+                    id: name.clone(),
+                    label: name,
+                    width: m.width as u32,
+                    height: m.height as u32,
+                    x: m.x as i32,
+                    y: m.y as i32,
+                    primary: m.primary,
+                });
             }
         }
         if out.is_empty() {
