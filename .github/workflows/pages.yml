@@ -16,23 +16,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Always runs. A broken page, a bad front matter block or a Jekyll error
+  # should fail the build whether or not the site is being published anywhere,
+  # because the docs are wrong either way.
   build:
+    name: Build the site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - uses: actions/checkout@v5
       - uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
           destination: ./_site
       - uses: actions/upload-pages-artifact@v3
 
+  # Only runs once somebody has turned Pages on. Publishing a site is a
+  # decision about a repository, not something a push should make for you, so
+  # this waits for an explicit opt in rather than enabling Pages by itself.
+  #
+  # To publish: Settings > Pages > Source: GitHub Actions, then add a
+  # repository variable PUBLISH_DOCS with the value true.
   deploy:
+    name: Publish
     needs: build
+    if: vars.PUBLISH_DOCS == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/configure-pages@v5
       - id: deployment
         uses: actions/deploy-pages@v4

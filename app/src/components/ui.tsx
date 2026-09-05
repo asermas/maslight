@@ -5,8 +5,12 @@ import type { ReactNode } from "react";
 export function Mark({ size = 26 }: { size?: number }) {
   // The brand mark, not an icon. Kept inline so it inherits the theme and
   // needs no network request.
+  //
+  // Hidden from assistive tech because every place it appears, the word
+  // MasLight is set right next to it. Labelling the mark as well would
+  // announce the name twice.
   return (
-    <svg viewBox="0 0 256 256" width={size} height={size} aria-label="MasLight">
+    <svg viewBox="0 0 256 256" width={size} height={size} aria-hidden focusable="false">
       <path
         d="M56 188 V72 L128 142 L200 72 V188"
         fill="none"
