@@ -169,12 +169,14 @@ want.
 
 Being plain about this matters more than a longer feature list:
 
-* **Wayland capture** stops after the portal handshake. The PipeWire reader is
-  written but has never been compiled on Linux, which is why it sits behind a
-  feature flag.
-* **Nobody has watched the Linux build drive a physical strip.** It compiles,
-  and continuous integration captures a real X server under Xvfb, but that is
-  not the same thing.
+* **Wayland capture** stops after the portal handshake. The PipeWire reader
+  is written and now compiles on Linux in continuous integration, clippy
+  included, but compiling is not running: no Wayland session has been captured
+  yet. It stays behind the `wayland` feature until one has.
+* **No physical strip has been driven, on any platform.** Continuous
+  integration captures a real X server under Xvfb and the output protocols are
+  asserted byte for byte against listeners, which is real but is not a strip on
+  a wall.
 * **macOS** has no capture backend. The app builds, but there is nothing to
   capture. That is the 0.3 milestone.
 * **Philips Hue Entertainment** is not implemented. It needs a DTLS handshake,

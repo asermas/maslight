@@ -165,11 +165,12 @@ mip'i üreten kutu filtresi zaten LED'lerin istediği ortalamanın ta kendisi.
 Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 
 * **Wayland yakalama** portal el sıkışmasından sonra duruyor. PipeWire okuyucu
-  yazıldı ama Linux'ta hiç derlenmedi; bu yüzden bir feature bayrağının
-  arkasında.
-* **Linux derlemesinin fiziksel bir şeridi sürdüğünü kimse görmedi.** Derleniyor
-  ve CI'da Xvfb altında gerçek bir X sunucusunu yakalıyor, ama bu aynı şey
-  değil.
+  yazıldı ve artık CI'da Linux'ta derleniyor, clippy dahil; ama derlenmek
+  çalışmak değil: henüz hiçbir Wayland oturumu yakalanmadı. Bir oturum
+  yakalanana kadar `wayland` feature'ının arkasında kalıyor.
+* **Hiçbir platformda fiziksel bir şerit sürülmedi.** CI Xvfb altında gerçek
+  bir X sunucusunu yakalıyor ve çıkış protokolleri dinleyicilere karşı bayt
+  bayt doğrulanıyor; bu gerçek bir doğrulama ama duvardaki bir şerit değil.
 * **macOS** için yakalama arka ucu yok. Uygulama derleniyor ama yakalayacak bir
   şey yok. Bu 0.3 hedefi.
 * **Philips Hue Entertainment** yapılmadı. DTLS el sıkışması gerekiyor; bu hem
