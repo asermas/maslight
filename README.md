@@ -15,11 +15,11 @@ MasLight drives an addressable LED strip from what is on your screen. It speaks
 WLED UDP, DDP, sACN, Art-Net and Adalight, it runs on Windows and Linux, and
 everything stays on your own machine.
 
-> **Status: 0.1.0.** The Windows path is complete and verified on real
-> hardware: capture, the colour pipeline and UDP output all run end to end. The
-> Linux X11 backend compiles and is written, but has not yet been run on a
-> Linux machine. Wayland is half done and the [Linux page](docs/linux.md)
-> explains exactly which half.
+> **Status: 0.2.0 in development.** The Windows path is complete and verified
+> on real hardware: capture, the colour pipeline, audio, scripted effects and
+> UDP output all run end to end. The Linux X11 backend is exercised under Xvfb
+> in continuous integration but has not yet driven a physical strip. Wayland is
+> half done and the [Linux page](docs/linux.md) explains exactly which half.
 
 ## Why this exists
 
@@ -137,10 +137,15 @@ Being plain about this matters more than a longer feature list:
 * **Wayland capture** stops after the portal handshake. The PipeWire reader is
   written but has never been compiled on Linux, which is why it sits behind a
   feature flag.
+* **Nobody has watched the Linux build drive a physical strip.** It compiles,
+  and continuous integration captures a real X server under Xvfb, but that is
+  not the same thing.
 * **macOS** has no capture backend. The app builds, but there is nothing to
   capture. That is the 0.3 milestone.
-* **Serial output** is implemented and unit tested, but behind a feature flag
-  and not yet exercised against real hardware.
+* **Philips Hue Entertainment** is not implemented. It needs a DTLS handshake,
+  which is a dependency and a protocol worth doing properly rather than badly.
+* **Serial, OpenRGB and MQTT** are implemented and tested against fake servers,
+  but none has met the real hardware or broker yet.
 
 ## Documentation
 

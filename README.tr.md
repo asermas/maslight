@@ -15,11 +15,11 @@ MasLight, ekranındaki görüntüden adreslenebilir LED şeridini sürer. WLED U
 DDP, sACN, Art-Net ve Adalight konuşur; Windows ve Linux'ta çalışır; her şey
 kendi makinende kalır.
 
-> **Durum: 0.1.0.** Windows yolu tamamlandı ve gerçek donanımda doğrulandı:
-> yakalama, renk hattı ve UDP çıkışı uçtan uca çalışıyor. Linux X11 arka ucu
-> yazıldı ve derleniyor, ancak henüz bir Linux makinesinde çalıştırılmadı.
-> Wayland yarım; hangi yarısının bittiğini [Linux sayfası](docs/linux.md)
-> açıkça anlatıyor.
+> **Durum: 0.2.0 geliştiriliyor.** Windows yolu tamamlandı ve gerçek donanımda
+> doğrulandı: yakalama, renk hattı, ses, script efektleri ve UDP çıkışı uçtan
+> uca çalışıyor. Linux X11 arka ucu CI'da Xvfb altında gerçekten çalıştırılıyor
+> ama henüz fiziksel bir şerit sürmedi. Wayland yarım; hangi yarısının bittiğini
+> [Linux sayfası](docs/linux.md) açıkça anlatıyor.
 
 ## Neden var
 
@@ -133,10 +133,15 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 * **Wayland yakalama** portal el sıkışmasından sonra duruyor. PipeWire okuyucu
   yazıldı ama Linux'ta hiç derlenmedi; bu yüzden bir feature bayrağının
   arkasında.
+* **Linux derlemesinin fiziksel bir şeridi sürdüğünü kimse görmedi.** Derleniyor
+  ve CI'da Xvfb altında gerçek bir X sunucusunu yakalıyor, ama bu aynı şey
+  değil.
 * **macOS** için yakalama arka ucu yok. Uygulama derleniyor ama yakalayacak bir
   şey yok. Bu 0.3 hedefi.
-* **Seri çıkış** yazıldı ve birim testleri var, ama feature bayrağının arkasında
-  ve henüz gerçek donanımda denenmedi.
+* **Philips Hue Entertainment** yapılmadı. DTLS el sıkışması gerekiyor; bu hem
+  bir bağımlılık hem de kötü değil düzgün yapılmayı hak eden bir protokol.
+* **Seri, OpenRGB ve MQTT** yazıldı ve sahte sunuculara karşı test edildi, ama
+  hiçbiri henüz gerçek donanımla ya da gerçek bir broker'la buluşmadı.
 
 ## Dokümantasyon
 
