@@ -651,7 +651,12 @@ impl Worker {
         let mut status = self.status.write();
         status.fps = self.fps_window.len() as f32;
         status.frame_ms = spent.as_secs_f32() * 1000.0;
-        status.idle = self.idle_frames > target_fps && !audio_active;
+        // Only meaningful while something is actually capturing. With no
+        // sources no frames arrive either, which counted as idle and put
+        // "the screen is still" on screen when the truth was that capture had
+        // never started: the reassuring message in exactly the case that
+        // needs looking at.
+        status.idle = !self.sources.is_empty() && self.idle_frames > target_fps && !audio_active;
         status.audio_active = audio_active;
         status.audio_energy = self
             .audio

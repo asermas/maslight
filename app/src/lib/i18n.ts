@@ -48,6 +48,7 @@ const en = {
   "dash.source": "Source",
   "dash.backend": "Capture",
   "dash.idle": "Screen is still, capture slowed down",
+  "dash.noCapture": "Capture is not running",
   "dash.devices": "Devices",
   "dash.noDevices": "No output device yet",
   "dash.noDevicesBody":
@@ -370,6 +371,7 @@ const tr: Record<keyof typeof en, string> = {
   "dash.source": "Kaynak",
   "dash.backend": "Yakalama",
   "dash.idle": "Ekran sabit, yakalama yavaşlatıldı",
+  "dash.noCapture": "Yakalama çalışmıyor",
   "dash.devices": "Cihazlar",
   "dash.noDevices": "Henüz çıkış cihazı yok",
   "dash.noDevicesBody": "Renklerin gideceği bir kontrolcü ekle.",

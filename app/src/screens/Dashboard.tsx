@@ -29,6 +29,10 @@ export function Dashboard({
 
   const color = profile.color;
   const hasBars = (status?.insets ?? [0, 0, 0, 0]).some((v) => v > 0.005);
+  const noCapture =
+    status?.running === true &&
+    profile.mode === "screen" &&
+    (!status.captureBackend || status.captureBackend === "none");
 
   return (
     <div className="stack">
@@ -36,7 +40,13 @@ export function Dashboard({
         title={t("dash.preview")}
         subtitle={t("dash.previewHint")}
         actions={
-          status?.idle ? <Badge tone="warn">{t("dash.idle")}</Badge> : null
+          // A screen profile with no capture backend is a problem, and saying
+          // the screen is merely still would hide it.
+          noCapture ? (
+            <Badge tone="bad">{t("dash.noCapture")}</Badge>
+          ) : status?.idle ? (
+            <Badge tone="warn">{t("dash.idle")}</Badge>
+          ) : null
         }
       >
         <StripPreview leds={status?.leds ?? []} />
