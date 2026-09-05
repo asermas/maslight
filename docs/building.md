@@ -47,10 +47,10 @@ works and needs no administrator rights. Two details:
 
 ```sh
 sudo apt install libx11-dev libxcb1-dev libxcb-shm0-dev libxcb-randr0-dev \
-                 libdbus-1-dev pkg-config build-essential
+                 libdbus-1-dev libasound2-dev pkg-config build-essential
 # for the desktop app
 sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev \
-                 libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
+                 libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev libasound2-dev
 ```
 
 ## macOS
