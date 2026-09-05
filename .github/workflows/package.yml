@@ -20,6 +20,12 @@ on:
       - "app/package.json"
       - ".github/workflows/package.yml"
 
+# A newer push makes an older run pointless, and a run nobody will read still
+# occupies a runner. Superseded runs cancel themselves.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   package:
     name: ${{ matrix.label }}
