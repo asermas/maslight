@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { WaveSine } from "@phosphor-icons/react";
 
-import { Card, EmptyState, Field, Segmented, Slider, Toggle } from "../components/ui";
+import { Card, Field, Segmented, Slider, Toggle } from "../components/ui";
+import { AudioPanel } from "./AudioPanel";
 import { api } from "../lib/api";
 import type { Store } from "../lib/store";
 import type {
@@ -10,6 +10,7 @@ import type {
   LightMode,
   LuminancePolicy,
 } from "../lib/types";
+import { hexToRgb, rgbToHex } from "../lib/types";
 
 export function Studio({ store }: { store: Store }) {
   const { t, profile, updateProfile } = store;
@@ -45,16 +46,29 @@ export function Studio({ store }: { store: Store }) {
             { value: "off", label: t("studio.modeOff") },
           ]}
         />
-        {profile.mode === "audio" && (
-          <div style={{ marginTop: "var(--s-4)" }}>
-            <EmptyState
-              icon={<WaveSine size={26} />}
-              title={t("studio.audioSoon")}
-              body={t("studio.audioSoonBody")}
-            />
+        {profile.mode === "effect" && (
+          <div style={{ marginTop: "var(--s-4)", maxWidth: 220 }}>
+            <Field label={t("studio.effectColor")}>
+              <input
+                type="color"
+                aria-label={t("studio.effectColor")}
+                value={rgbToHex(profile.effectColor)}
+                onChange={(e) =>
+                  updateProfile((p) => ({
+                    ...p,
+                    effectColor: hexToRgb(e.target.value),
+                  }))
+                }
+                style={{ height: 34, padding: 3 }}
+              />
+            </Field>
           </div>
         )}
       </Card>
+
+      {(profile.mode === "audio" || profile.audioBlend > 0) && (
+        <AudioPanel store={store} />
+      )}
 
       <div className="grid-2">
         <Card title={t("studio.picture")}>

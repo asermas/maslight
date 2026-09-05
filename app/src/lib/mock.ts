@@ -99,6 +99,21 @@ const config: AppConfig = {
         ledChannelMa: 20,
         rgbwMode: "none",
       },
+      effectColor: { r: 255, g: 170, b: 90 },
+      audio: {
+        device: null,
+        bands: 16,
+        gain: 1,
+        floorDb: -62,
+        ceilingDb: -12,
+        attackMs: 18,
+        releaseMs: 220,
+        beatSensitivity: 1.4,
+        beatBoost: 0.35,
+        scrollSpeed: 0.08,
+        effect: "spectrum",
+        palette: { fromHue: 0.62, toHue: 0.08, saturation: 1 },
+      },
       capture: {
         backend: "auto",
         targetFps: 60,
@@ -165,6 +180,8 @@ function status(): EngineStatus {
     sourceWidth: 2560,
     sourceHeight: 1440,
     insets: [0, 0, 0, 0],
+    audioActive: false,
+    audioEnergy: 0,
     frames: Math.floor((Date.now() - started) / 16),
     lastError: null,
   };
@@ -242,6 +259,7 @@ export const mockBackend = {
   delete_profile: async () => structuredClone(current),
   list_displays: async () => displays,
   list_capture_backends: async () => backends,
+  list_audio_devices: async () => ["Speakers (demo)"],
   discover_devices: async () => discovered,
   probe_device: async () => discovered[0],
   build_layout: async (args: { params: WizardParams }) =>

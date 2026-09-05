@@ -15,6 +15,7 @@ use std::sync::Arc;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
+use maslight_audio::AudioEngine;
 use maslight_capture::{create_backend, CaptureBackend, DisplayInfo, FrameStatus};
 use maslight_core::{
     AppConfig, ColorPipeline, DeviceConfig, Insets, LedFrame, LightMode, Profile, Rect, Reducer,
@@ -141,6 +142,9 @@ struct Worker {
     /// Frames waiting out the configured latency compensation.
     delay: VecDeque<(Instant, LedFrame)>,
 
+    /// Loopback capture and analysis, started only when a profile asks for it.
+    audio: Option<AudioEngine>,
+    audio_scratch: Vec<Rgb>,
     hold: Option<Rgb8>,
     identify_until: Option<(usize, Instant)>,
     dirty: bool,
@@ -165,6 +169,8 @@ impl Worker {
             reducer,
             canvas: Vec::new(),
             delay: VecDeque::new(),
+            audio: None,
+            audio_scratch: Vec::new(),
             hold: None,
             identify_until: None,
             dirty: true,
@@ -248,10 +254,27 @@ impl Worker {
             }
         }
 
+        // --- audio ---
+        let wants_audio =
+            self.config.enabled && (profile.mode == LightMode::Audio || profile.audio_blend > 0.0);
+        if wants_audio {
+            if self.audio.is_none() {
+                match AudioEngine::start(&profile.audio) {
+                    Ok(engine) => {
+                        tracing::info!("audio capture on {}", engine.device_name());
+                        self.audio = Some(engine);
+                    }
+                    Err(e) => tracing::warn!("audio unavailable: {e}"),
+                }
+            }
+        } else if let Some(mut engine) = self.audio.take() {
+            engine.stop();
+        }
+
         // --- capture ---
         self.sources.clear();
         let mut capture_error = None;
-        if profile.mode == LightMode::Screen && self.config.enabled {
+        if matches!(profile.mode, LightMode::Screen) && self.config.enabled {
             for display_id in profile.layout.active_displays() {
                 let mut rects = Vec::new();
                 let mut targets = Vec::new();
@@ -366,6 +389,16 @@ impl Worker {
             return;
         }
 
+        if profile.mode == LightMode::Effect {
+            let frame = LedFrame {
+                rgb: vec![profile.effect_color; profile.layout.len()],
+                white: Vec::new(),
+            };
+            self.emit(frame);
+            std::thread::sleep(Duration::from_millis(33));
+            return;
+        }
+
         let target_fps = profile.capture.target_fps.max(1);
         let budget = Duration::from_secs_f32(1.0 / target_fps as f32);
         let frame_start = Instant::now();
@@ -433,11 +466,35 @@ impl Worker {
             self.canvas.resize(profile.layout.len(), Rgb::BLACK);
         }
 
+        // Audio either replaces the screen or is mixed into it. Mixing happens
+        // in linear light, before the colour pipeline, so brightness and white
+        // balance apply once to the result rather than twice to the parts.
+        let mut audio_active = false;
+        if let Some(engine) = &mut self.audio {
+            let len = self.canvas.len();
+            if engine.frame(&profile.audio, len, dt, &mut self.audio_scratch) {
+                audio_active = true;
+                let blend = if profile.mode == LightMode::Audio {
+                    1.0
+                } else {
+                    profile.audio_blend
+                };
+                for (slot, audio) in self.canvas.iter_mut().zip(self.audio_scratch.iter()) {
+                    *slot = slot.lerp(*audio, blend);
+                }
+            }
+        }
+
         let frame = self.pipeline.process(&self.canvas, dt);
         self.emit(frame);
 
         // --- pacing ---
-        if any_new {
+        // Audio is activity too. Without this, a profile with no capture
+        // source looks idle and the strip updates ten times a second.
+        if audio_active {
+            self.idle_frames = 0;
+        }
+        if any_new || audio_active {
             self.idle_frames = 0;
             self.fps_window.push_back(now);
             while self
@@ -467,7 +524,13 @@ impl Worker {
         let mut status = self.status.write();
         status.fps = self.fps_window.len() as f32;
         status.frame_ms = spent.as_secs_f32() * 1000.0;
-        status.idle = self.idle_frames > target_fps;
+        status.idle = self.idle_frames > target_fps && !audio_active;
+        status.audio_active = audio_active;
+        status.audio_energy = self
+            .audio
+            .as_ref()
+            .map(|e| e.spectrum().energy)
+            .unwrap_or(0.0);
         status.insets = [
             self.sources.first().map(|s| s.insets.top).unwrap_or(0.0),
             self.sources.first().map(|s| s.insets.bottom).unwrap_or(0.0),
@@ -532,6 +595,9 @@ impl Worker {
     fn shutdown(&mut self) {
         let len = self.config.active().layout.len();
         self.blackout(len);
+        if let Some(mut engine) = self.audio.take() {
+            engine.stop();
+        }
         for source in &mut self.sources {
             source.backend.stop();
         }
@@ -557,9 +623,12 @@ fn probe_reachable(device: &DeviceConfig) -> Option<bool> {
         DeviceConfig::Wled { host, .. } | DeviceConfig::Ddp { host, .. } => host,
         _ => return None,
     };
-    Some(
-        maslight_output::discovery::query_wled_info(host, Duration::from_millis(600)).is_some(),
-    )
+    Some(maslight_output::discovery::query_wled_info(host, Duration::from_millis(600)).is_some())
+}
+
+/// Audio devices the audio mode can listen to.
+pub fn list_audio_devices() -> Vec<String> {
+    maslight_audio::list_devices()
 }
 
 /// Displays visible to a capture backend, for the setup wizard.

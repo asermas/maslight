@@ -87,6 +87,12 @@ pub fn list_capture_backends() -> Vec<BackendOption> {
         .collect()
 }
 
+/// Audio devices the audio mode can listen to.
+#[tauri::command]
+pub fn list_audio_devices() -> Vec<String> {
+    maslight_engine::list_audio_devices()
+}
+
 #[tauri::command]
 pub async fn discover_devices(timeout_ms: Option<u64>) -> Vec<DiscoveredDevice> {
     let ms = timeout_ms.unwrap_or(2500).clamp(300, 15_000);

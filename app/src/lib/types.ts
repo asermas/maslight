@@ -10,6 +10,7 @@ export type ColorOrder = "rgb" | "rbg" | "grb" | "gbr" | "brg" | "bgr";
 export type LuminancePolicy = "minimum-level" | "dead-zone";
 export type RgbwMode = "none" | "subtract" | "additive";
 export type LightMode = "screen" | "audio" | "effect" | "off";
+export type AudioEffect = "spectrum" | "energy" | "wave" | "scroll";
 export type Corner = "bottom-left" | "bottom-right" | "top-left" | "top-right";
 export type Direction = "clockwise" | "counter-clockwise";
 export type WledProtocol = "warls" | "drgb" | "dnrgb" | "drgbw" | "dnrgbw";
@@ -113,6 +114,27 @@ export interface CaptureSettings {
   sampleGrid: number;
 }
 
+export interface Palette {
+  fromHue: number;
+  toHue: number;
+  saturation: number;
+}
+
+export interface AudioSettings {
+  device: string | null;
+  bands: number;
+  gain: number;
+  floorDb: number;
+  ceilingDb: number;
+  attackMs: number;
+  releaseMs: number;
+  beatSensitivity: number;
+  beatBoost: number;
+  scrollSpeed: number;
+  effect: AudioEffect;
+  palette: Palette;
+}
+
 export type DeviceConfig =
   | {
       kind: "wled";
@@ -141,6 +163,8 @@ export interface Profile {
   layout: Layout;
   color: ColorSettings;
   capture: CaptureSettings;
+  audio: AudioSettings;
+  effectColor: Rgb8;
   devices: DeviceConfig[];
   latencyMs: number;
   audioBlend: number;
@@ -202,6 +226,8 @@ export interface EngineStatus {
   sourceWidth: number;
   sourceHeight: number;
   insets: [number, number, number, number];
+  audioActive: boolean;
+  audioEnergy: number;
   frames: number;
   lastError: string | null;
 }
@@ -275,6 +301,20 @@ export function deviceLabel(device: DeviceConfig): string {
     default:
       return "Disconnected";
   }
+}
+
+/** `#rrggbb` for an 8-bit colour. */
+export function rgbToHex(c: Rgb8): string {
+  const hex = (v: number) => v.toString(16).padStart(2, "0");
+  return `#${hex(c.r)}${hex(c.g)}${hex(c.b)}`;
+}
+
+/** Parse `#rrggbb`, falling back to black. */
+export function hexToRgb(value: string): Rgb8 {
+  const v = value.replace("#", "");
+  const n = Number.parseInt(v, 16);
+  if (v.length !== 6 || Number.isNaN(n)) return { r: 0, g: 0, b: 0 };
+  return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff };
 }
 
 export function rgbToCss(c: Rgb8): string {

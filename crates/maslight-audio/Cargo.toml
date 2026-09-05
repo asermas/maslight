@@ -1,6 +1,6 @@
 [package]
-name = "maslight-engine"
-description = "MasLight capture-to-output engine and telemetry"
+name = "maslight-audio"
+description = "MasLight audio capture, spectrum analysis and audio reactive effects"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,11 +10,9 @@ authors.workspace = true
 
 [dependencies]
 maslight-core = { workspace = true }
-maslight-output = { workspace = true }
-maslight-capture = { workspace = true }
-maslight-audio = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 parking_lot = { workspace = true }
+cpal = "0.18"
+rustfft = "6.4"

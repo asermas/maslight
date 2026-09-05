@@ -45,6 +45,9 @@ etmek zorunda kalmıyor.
 
 * **Ekran yakalamalı ambilight.** Renk hattı ilk pikselden son bayta kadar
   lineer ışıkta kalıyor.
+* **Sese tepkili mod.** Hoparlörden çalan sesin loopback yakalaması, logaritmik
+  bantlı spektrum, beat tespiti, dört efekt ve bir karışım kontrolü: müzik
+  şeridin bir kısmını devralırken geri kalanı ekranı göstermeye devam eder.
 * **Serbest yerleşim editörü.** Kenar başına LED sayısından yerleşim üret,
   sonra LED'leri tek tek sürükle. Çoklu monitör, ekran dışı LED'ler, zincirdeki
   boşluklar, ters takılmış şerit ve RGBW modelin parçası.
@@ -93,6 +96,7 @@ yakalama arka ucu -> bölge indirgeyici -> renk hattı -> çıkış
 | `maslight-core` | Renk hattı, yerleşim modeli, bölge indirgeyici, profiller. Platform kodu yok. |
 | `maslight-capture` | `CaptureBackend` trait'i + DXGI, X11, PipeWire ve sentetik kaynak. |
 | `maslight-output` | `Sink` trait'i + WLED, DDP, sACN, Art-Net, seri, keşif. |
+| `maslight-audio` | Loopback yakalama, spektrum analizi, beat tespiti, efektler. |
 | `maslight-engine` | Döngü, profiller, telemetri, gecikme telafisi. |
 | `app/` | Tauri kabuğu ve React arayüzü. |
 
@@ -118,8 +122,8 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
   arkasında.
 * **macOS** için yakalama arka ucu yok. Uygulama derleniyor ama yakalayacak bir
   şey yok. Bu 0.3 hedefi.
-* **Ses motoru ve kural motoru** 0.2. Ekranları var ve numara yapmak yerine
-  durumu açıkça söylüyor.
+* **Kural motoru** 0.2. Ekranı var ve numara yapmak yerine durumu açıkça
+  söylüyor.
 * **Yerel REST ve WebSocket API** 0.2.
 * **Seri çıkış** yazıldı ve birim testleri var, ama feature bayrağının arkasında
   ve henüz gerçek donanımda denenmedi.
@@ -128,6 +132,7 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 
 * [Kurulum](docs/install.md)
 * [Linux: X11 ve Wayland](docs/linux.md)
+* [Ses modu](docs/audio.md)
 * [Çıkış protokolleri](docs/protocols.md)
 * [Yerleşim modeli](docs/layout.md)
 * [Kaynaktan derleme](docs/building.md)

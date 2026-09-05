@@ -4,6 +4,7 @@ members = [
     "crates/maslight-core",
     "crates/maslight-output",
     "crates/maslight-capture",
+    "crates/maslight-audio",
     "crates/maslight-engine",
     "app/src-tauri",
 ]
@@ -21,6 +22,7 @@ authors = ["MasLight contributors"]
 maslight-core = { path = "crates/maslight-core", version = "0.1.0" }
 maslight-output = { path = "crates/maslight-output", version = "0.1.0" }
 maslight-capture = { path = "crates/maslight-capture", version = "0.1.0" }
+maslight-audio = { path = "crates/maslight-audio", version = "0.1.0" }
 maslight-engine = { path = "crates/maslight-engine", version = "0.1.0" }
 
 serde = { version = "1.0", features = ["derive"] }

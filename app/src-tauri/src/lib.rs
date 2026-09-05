@@ -72,6 +72,7 @@ pub fn run() {
             commands::delete_profile,
             commands::list_displays,
             commands::list_capture_backends,
+            commands::list_audio_devices,
             commands::discover_devices,
             commands::probe_device,
             commands::build_layout,

@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+use crate::audio::AudioSettings;
 use crate::color::ColorSettings;
 use crate::layout::Layout;
 
@@ -235,6 +236,9 @@ pub struct Profile {
     pub layout: Layout,
     pub color: ColorSettings,
     pub capture: CaptureSettings,
+    pub audio: AudioSettings,
+    /// Colour shown in [`LightMode::Effect`].
+    pub effect_color: crate::types::Rgb8,
     pub devices: Vec<DeviceConfig>,
     /// Extra delay in milliseconds applied before sending, so the strip and
     /// the panel change at the same instant. Measured by the wizard.
@@ -252,6 +256,8 @@ impl Default for Profile {
             layout: Layout::default(),
             color: ColorSettings::default(),
             capture: CaptureSettings::default(),
+            audio: AudioSettings::default(),
+            effect_color: crate::types::Rgb8::new(255, 170, 90),
             devices: Vec::new(),
             latency_ms: 0,
             audio_blend: 0.0,
@@ -263,6 +269,7 @@ impl Profile {
     pub fn sanitise(&mut self) {
         self.color.sanitise();
         self.capture.sanitise();
+        self.audio.sanitise();
         self.layout.normalise();
         self.latency_ms = self.latency_ms.min(2000);
         if !self.audio_blend.is_finite() {

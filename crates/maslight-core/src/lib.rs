@@ -17,12 +17,14 @@
 //! assert_eq!(frame.rgb[0].r, 255);
 //! ```
 
+pub mod audio;
 pub mod color;
 pub mod layout;
 pub mod profile;
 pub mod reduce;
 pub mod types;
 
+pub use audio::{AudioEffect, AudioSettings, Palette};
 pub use color::{
     linear_to_srgb, srgb_to_linear, ColorPipeline, ColorSettings, LuminancePolicy, RgbwMode,
 };

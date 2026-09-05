@@ -45,6 +45,10 @@ actually shows, so nobody has to guess whether their chip is GRB or RGB.
 
 * **Screen capture ambilight** with a colour pipeline that stays in linear
   light from the first pixel to the last byte.
+* **Audio reactive mode.** Loopback capture of whatever your speakers are
+  playing, a log spaced spectrum, beat detection, four effects, and a blend
+  control so music can take over part of the strip while the screen keeps the
+  rest.
 * **Free form layout editor.** Generate a layout from the LED count on each
   edge, then drag individual LEDs. Multiple monitors, off screen LEDs, gaps in
   the chain, reversed strips and RGBW are all part of the model.
@@ -94,6 +98,7 @@ capture backend  ->  zone reducer  ->  colour pipeline  ->  sink
 | `maslight-core` | Colour pipeline, layout model, zone reducer, profiles. No platform code. |
 | `maslight-capture` | `CaptureBackend` trait plus DXGI, X11, PipeWire and a synthetic source. |
 | `maslight-output` | `Sink` trait plus WLED, DDP, sACN, Art-Net, serial, discovery. |
+| `maslight-audio` | Loopback capture, spectrum analysis, beat detection, effects. |
 | `maslight-engine` | The loop, profiles, telemetry, latency compensation. |
 | `app/` | Tauri shell and the React interface. |
 
@@ -120,8 +125,8 @@ Being plain about this matters more than a longer feature list:
   feature flag.
 * **macOS** has no capture backend. The app builds, but there is nothing to
   capture. That is the 0.3 milestone.
-* **The audio engine and the rule engine** are 0.2. Their screens exist and say
-  so rather than pretending otherwise.
+* **The rule engine** is 0.2. Its screen exists and says so rather than
+  pretending otherwise.
 * **The local REST and WebSocket API** is 0.2.
 * **Serial output** is implemented and unit tested, but behind a feature flag
   and not yet exercised against real hardware.
@@ -130,6 +135,7 @@ Being plain about this matters more than a longer feature list:
 
 * [Installing](docs/install.md)
 * [Linux: X11 and Wayland](docs/linux.md)
+* [The audio mode](docs/audio.md)
 * [Output protocols](docs/protocols.md)
 * [The layout model](docs/layout.md)
 * [Building from source](docs/building.md)

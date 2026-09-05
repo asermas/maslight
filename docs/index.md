@@ -12,6 +12,7 @@ packets it sends to your LED controller.
 
 * [Installing](install.md)
 * [Linux: X11 and Wayland](linux.md)
+* [The audio mode](audio.md)
 * [Output protocols](protocols.md)
 * [The layout model](layout.md)
 * [Building from source](building.md)

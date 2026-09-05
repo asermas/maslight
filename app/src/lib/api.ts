@@ -44,6 +44,7 @@ export const api = {
   listDisplays: (backend?: CaptureBackendKind) =>
     call<DisplayInfo[]>("list_displays", { backend: backend ?? null }),
   listCaptureBackends: () => call<BackendOption[]>("list_capture_backends"),
+  listAudioDevices: () => call<string[]>("list_audio_devices"),
   discoverDevices: (timeoutMs = 2500) =>
     call<DiscoveredDevice[]>("discover_devices", { timeoutMs }),
   probeDevice: (host: string) =>

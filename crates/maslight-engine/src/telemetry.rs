@@ -49,6 +49,10 @@ pub struct EngineStatus {
     pub source_height: u32,
     /// Detected letterbox insets: top, bottom, left, right.
     pub insets: [f32; 4],
+    /// Audio capture is running and contributing to the frame.
+    pub audio_active: bool,
+    /// Overall loudness the audio engine last measured, 0..=1.
+    pub audio_energy: f32,
     /// Total frames sent since start.
     pub frames: u64,
     pub last_error: Option<String>,
@@ -73,6 +77,8 @@ impl Default for EngineStatus {
             source_width: 0,
             source_height: 0,
             insets: [0.0; 4],
+            audio_active: false,
+            audio_energy: 0.0,
             frames: 0,
             last_error: None,
         }
