@@ -2,10 +2,12 @@
 //!
 //! Everything interesting happens in `maslight-engine`; this crate is the
 //! shell around it: the window, the tray, the commands the interface calls,
-//! and the small amount of platform glue for starting at login.
+//! the optional local API, and the small amount of platform glue for starting
+//! at login.
 
 use std::sync::Arc;
 
+use maslight_api::ApiServer;
 use maslight_core::{AppConfig, Layout, Rgb8, WizardParams};
 use maslight_engine::{EngineHandle, EngineStatus};
 use parking_lot::Mutex;
@@ -13,24 +15,20 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, State, WindowEvent};
 
+mod api_bridge;
 mod autostart;
 mod commands;
 
-/// Shared application state.
-pub struct AppState {
+/// State the interface, the tray and the API all share.
+///
+/// Held behind an `Arc` because the API server outlives any single request and
+/// needs its own handle on the same configuration.
+pub struct Shared {
     pub config: Mutex<AppConfig>,
     pub engine: Mutex<Arc<EngineHandle>>,
 }
 
-impl AppState {
-    fn new(config: AppConfig) -> Self {
-        let engine = EngineHandle::spawn(config.clone());
-        Self {
-            config: Mutex::new(config),
-            engine: Mutex::new(Arc::new(engine)),
-        }
-    }
-
+impl Shared {
     /// Persist the configuration and hand it to the engine.
     pub fn commit(&self, config: AppConfig) -> Result<(), String> {
         let mut config = config;
@@ -42,9 +40,41 @@ impl AppState {
         *self.config.lock() = config;
         Ok(())
     }
+}
+
+/// What Tauri manages.
+pub struct AppState {
+    pub shared: Arc<Shared>,
+    /// The local API server, when the configuration asks for one.
+    pub api: Mutex<Option<ApiServer>>,
+}
+
+impl AppState {
+    fn new(config: AppConfig) -> Self {
+        let engine = EngineHandle::spawn(config.clone());
+        Self {
+            shared: Arc::new(Shared {
+                config: Mutex::new(config),
+                engine: Mutex::new(Arc::new(engine)),
+            }),
+            api: Mutex::new(None),
+        }
+    }
+
+    pub fn config(&self) -> AppConfig {
+        self.shared.config.lock().clone()
+    }
+
+    /// Persist, hand to the engine, and bring the API server in line.
+    pub fn commit(&self, config: AppConfig) -> Result<(), String> {
+        self.shared.commit(config)?;
+        let mut server = self.api.lock();
+        api_bridge::reconcile(&self.shared, &mut server);
+        Ok(())
+    }
 
     pub fn status(&self) -> EngineStatus {
-        self.engine.lock().status()
+        self.shared.engine.lock().status()
     }
 }
 
@@ -57,9 +87,23 @@ pub fn run() {
         )
         .init();
 
-    let config = AppConfig::load_or_default();
+    let mut config = AppConfig::load_or_default();
+    // A configuration that asks for the API but carries no token would refuse
+    // to start the server, so fill one in before anything reads it.
+    if config.ui.api_token.trim().is_empty() {
+        config.ui.api_token = maslight_api::generate_token();
+        // Write it straight away: a token that only exists in memory would
+        // change on every launch and break every script that stored it.
+        if let Err(e) = config.save_to(&maslight_core::profile::config_path()) {
+            tracing::warn!("could not store the API token: {e}");
+        }
+    }
     let start_minimised = config.ui.start_minimised;
     let state = AppState::new(config);
+    {
+        let mut server = state.api.lock();
+        api_bridge::reconcile(&state.shared, &mut server);
+    }
 
     tauri::Builder::default()
         .manage(state)
@@ -79,6 +123,7 @@ pub fn run() {
             commands::identify_led,
             commands::hold_color,
             commands::set_launch_at_login,
+            commands::regenerate_api_token,
             commands::app_info,
             commands::open_config_dir,
         ])
@@ -122,12 +167,12 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
             "show" => show_main(app),
             "toggle" => {
                 let state: State<'_, AppState> = app.state();
-                let enabled = !state.config.lock().enabled;
-                {
-                    let mut cfg = state.config.lock();
-                    cfg.enabled = enabled;
+                let mut config = state.config();
+                config.enabled = !config.enabled;
+                let enabled = config.enabled;
+                if let Err(e) = state.commit(config) {
+                    tracing::warn!("could not toggle from the tray: {e}");
                 }
-                state.engine.lock().set_enabled(enabled);
                 let _ = app.emit("maslight://enabled", enabled);
             }
             "quit" => app.exit(0),
@@ -163,14 +208,5 @@ pub fn layout_from_wizard(params: &WizardParams) -> Layout {
 
 /// Parse a `#rrggbb` string into a colour.
 pub fn parse_hex(value: &str) -> Option<Rgb8> {
-    let v = value.trim().trim_start_matches('#');
-    if v.len() != 6 {
-        return None;
-    }
-    let n = u32::from_str_radix(v, 16).ok()?;
-    Some(Rgb8::new(
-        ((n >> 16) & 0xff) as u8,
-        ((n >> 8) & 0xff) as u8,
-        (n & 0xff) as u8,
-    ))
+    maslight_api::parse_hex(value)
 }

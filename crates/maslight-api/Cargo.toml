@@ -1,0 +1,18 @@
+[package]
+name = "maslight-api"
+description = "MasLight local REST and WebSocket control API"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+maslight-core = { workspace = true }
+maslight-engine = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "time", "sync", "macros"] }

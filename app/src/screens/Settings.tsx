@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { FolderOpen, Plus, Trash } from "@phosphor-icons/react";
 
-import { Alert, Card, Field, Segmented, Toggle } from "../components/ui";
+import { Alert, Card, Field, NumberInput, Segmented, Toggle } from "../components/ui";
 import { api } from "../lib/api";
 import type { Store } from "../lib/store";
 
 export function Settings({ store }: { store: Store }) {
   const { t, config, info, update, setNotice } = store;
+  const [showToken, setShowToken] = useState(false);
   if (!config) return null;
 
   const setUi = (patch: Partial<typeof config.ui>) =>
@@ -95,6 +97,93 @@ export function Settings({ store }: { store: Store }) {
             {t("settings.updatesHint")}
           </p>
         </div>
+      </Card>
+
+      <Card title={t("settings.api")}>
+        <p className="hint" style={{ marginBottom: "var(--s-4)" }}>
+          {t("settings.apiHint")}
+        </p>
+        <Toggle
+          label={t("settings.apiEnable")}
+          checked={config.ui.enableApi}
+          onChange={(v) => setUi({ enableApi: v })}
+        />
+        {config.ui.enableApi && (
+          <div style={{ display: "grid", gap: "var(--s-4)", marginTop: "var(--s-4)" }}>
+            <div className="grid-2">
+              <Field label={t("settings.apiPort")}>
+                <NumberInput
+                  value={config.ui.apiPort}
+                  min={1024}
+                  max={65535}
+                  onChange={(v) => setUi({ apiPort: Math.round(v) })}
+                />
+              </Field>
+              <Field label={t("settings.apiAddress")}>
+                <input
+                  type="text"
+                  readOnly
+                  data-selectable
+                  value={`http://127.0.0.1:${info?.apiPort ?? config.ui.apiPort}`}
+                />
+              </Field>
+            </div>
+            <Field label={t("settings.apiToken")} hint={t("settings.apiTokenHint")}>
+              <div className="row">
+                <input
+                  type={showToken ? "text" : "password"}
+                  readOnly
+                  data-selectable
+                  value={config.ui.apiToken}
+                />
+                <button
+                  className="btn btn-sm"
+                  onClick={() => setShowToken(!showToken)}
+                >
+                  {showToken ? t("settings.apiHide") : t("settings.apiShow")}
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={() => {
+                    navigator.clipboard
+                      ?.writeText(config.ui.apiToken)
+                      .then(() => setNotice(t("settings.apiCopied")))
+                      .catch(() => {});
+                  }}
+                >
+                  {t("settings.apiCopy")}
+                </button>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => {
+                    api
+                      .regenerateApiToken()
+                      .then(() => setNotice(t("settings.apiRegenerated")))
+                      .catch(() => {});
+                  }}
+                >
+                  {t("settings.apiRegenerate")}
+                </button>
+              </div>
+            </Field>
+            <pre
+              className="mono"
+              data-selectable
+              style={{
+                margin: 0,
+                padding: "var(--s-3)",
+                background: "var(--surface-2)",
+                border: "1px solid var(--hairline)",
+                borderRadius: "var(--r-md)",
+                overflowX: "auto",
+                color: "var(--ink-muted)",
+              }}
+            >
+{`curl -H "Authorization: Bearer ${config.ui.apiToken}" \
+  http://127.0.0.1:${info?.apiPort ?? config.ui.apiPort}/api/status`}
+            </pre>
+          </div>
+        )}
       </Card>
 
       <Card title={t("settings.profiles")}>

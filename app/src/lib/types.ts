@@ -189,6 +189,7 @@ export interface UiPrefs {
   checkForUpdates: boolean;
   enableApi: boolean;
   apiPort: number;
+  apiToken: string;
 }
 
 export interface AppConfig {
@@ -266,6 +267,7 @@ export interface AppInfo {
   configPath: string;
   autostartSupported: boolean;
   serialSupported: boolean;
+  apiPort: number | null;
 }
 
 /** Find the profile the configuration points at. */

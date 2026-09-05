@@ -56,6 +56,10 @@ actually shows, so nobody has to guess whether their chip is GRB or RGB.
   wire.
 * **Automatic device discovery** over mDNS, then a question to the controller
   about how many LEDs it drives.
+* **Rules that switch profiles on their own**: a running program, something
+  fullscreen, a time range, or running on battery.
+* **A local REST and WebSocket API**, on loopback, behind a token, off until
+  you turn it on.
 * **Light on the machine.** A still screen drops the capture rate on its own,
   and even at full speed the readback is a small image rather than a whole
   desktop.
@@ -99,6 +103,8 @@ capture backend  ->  zone reducer  ->  colour pipeline  ->  sink
 | `maslight-capture` | `CaptureBackend` trait plus DXGI, X11, PipeWire and a synthetic source. |
 | `maslight-output` | `Sink` trait plus WLED, DDP, sACN, Art-Net, serial, discovery. |
 | `maslight-audio` | Loopback capture, spectrum analysis, beat detection, effects. |
+| `maslight-rules` | Automatic profile switching and the platform probes it needs. |
+| `maslight-api` | The local REST and WebSocket server. |
 | `maslight-engine` | The loop, profiles, telemetry, latency compensation. |
 | `app/` | Tauri shell and the React interface. |
 
@@ -125,9 +131,6 @@ Being plain about this matters more than a longer feature list:
   feature flag.
 * **macOS** has no capture backend. The app builds, but there is nothing to
   capture. That is the 0.3 milestone.
-* **The rule engine** is 0.2. Its screen exists and says so rather than
-  pretending otherwise.
-* **The local REST and WebSocket API** is 0.2.
 * **Serial output** is implemented and unit tested, but behind a feature flag
   and not yet exercised against real hardware.
 
@@ -136,6 +139,7 @@ Being plain about this matters more than a longer feature list:
 * [Installing](docs/install.md)
 * [Linux: X11 and Wayland](docs/linux.md)
 * [The audio mode](docs/audio.md)
+* [The local API](docs/api.md)
 * [Output protocols](docs/protocols.md)
 * [The layout model](docs/layout.md)
 * [Building from source](docs/building.md)

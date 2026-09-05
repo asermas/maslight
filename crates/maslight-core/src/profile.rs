@@ -319,6 +319,9 @@ pub struct UiPrefs {
     /// Serve the local REST + WebSocket API.
     pub enable_api: bool,
     pub api_port: u16,
+    /// Bearer token the API requires. Generated the first time the API is
+    /// turned on; regenerating it revokes every script that had the old one.
+    pub api_token: String,
 }
 
 impl Default for UiPrefs {
@@ -331,6 +334,7 @@ impl Default for UiPrefs {
             check_for_updates: false,
             enable_api: false,
             api_port: 4599,
+            api_token: String::new(),
         }
     }
 }

@@ -53,6 +53,7 @@ export const api = {
   identifyLed: (index: number, ms = 1200) =>
     call<void>("identify_led", { index, ms }),
   holdColor: (color: string | null) => call<void>("hold_color", { color }),
+  regenerateApiToken: () => call<string>("regenerate_api_token"),
   setLaunchAtLogin: (enabled: boolean) =>
     call<void>("set_launch_at_login", { enabled }),
   appInfo: () => call<AppInfo>("app_info"),

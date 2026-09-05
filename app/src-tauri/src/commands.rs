@@ -15,13 +15,13 @@ use crate::{parse_hex, AppState};
 
 #[tauri::command]
 pub fn get_config(state: State<'_, AppState>) -> AppConfig {
-    state.config.lock().clone()
+    state.config()
 }
 
 #[tauri::command]
 pub fn save_config(state: State<'_, AppState>, config: AppConfig) -> Result<AppConfig, String> {
     state.commit(config)?;
-    Ok(state.config.lock().clone())
+    Ok(state.config())
 }
 
 #[tauri::command]
@@ -31,30 +31,30 @@ pub fn get_status(state: State<'_, AppState>) -> EngineStatus {
 
 #[tauri::command]
 pub fn set_enabled(state: State<'_, AppState>, enabled: bool) -> Result<(), String> {
-    let mut config = state.config.lock().clone();
+    let mut config = state.config();
     config.enabled = enabled;
     state.commit(config)
 }
 
 #[tauri::command]
 pub fn set_active_profile(state: State<'_, AppState>, id: String) -> Result<AppConfig, String> {
-    let mut config = state.config.lock().clone();
+    let mut config = state.config();
     if config.profile(&id).is_none() {
         return Err(format!("no profile with id {id}"));
     }
     config.active_profile = id;
     state.commit(config)?;
-    Ok(state.config.lock().clone())
+    Ok(state.config())
 }
 
 #[tauri::command]
 pub fn delete_profile(state: State<'_, AppState>, id: String) -> Result<AppConfig, String> {
-    let mut config = state.config.lock().clone();
+    let mut config = state.config();
     if !config.remove(&id) {
         return Err(String::from("the last profile cannot be deleted"));
     }
     state.commit(config)?;
-    Ok(state.config.lock().clone())
+    Ok(state.config())
 }
 
 #[tauri::command]
@@ -131,22 +131,36 @@ pub fn build_layout(params: WizardParams) -> Layout {
 
 #[tauri::command]
 pub fn identify_led(state: State<'_, AppState>, index: usize, ms: Option<u64>) {
-    state.engine.lock().identify(index, ms.unwrap_or(1200));
+    state
+        .shared
+        .engine
+        .lock()
+        .identify(index, ms.unwrap_or(1200));
 }
 
 /// Drive the whole strip with one colour, or clear the hold with `None`.
 #[tauri::command]
 pub fn hold_color(state: State<'_, AppState>, color: Option<String>) {
     let parsed = color.as_deref().and_then(parse_hex);
-    state.engine.lock().hold_color(parsed);
+    state.shared.engine.lock().hold_color(parsed);
 }
 
 #[tauri::command]
 pub fn set_launch_at_login(state: State<'_, AppState>, enabled: bool) -> Result<(), String> {
     crate::autostart::set(enabled)?;
-    let mut config = state.config.lock().clone();
+    let mut config = state.config();
     config.ui.launch_at_login = enabled;
     state.commit(config)
+}
+
+/// Issue a new API token, revoking every script that had the old one.
+#[tauri::command]
+pub fn regenerate_api_token(state: State<'_, AppState>) -> Result<String, String> {
+    let mut config = state.config();
+    let token = maslight_api::generate_token();
+    config.ui.api_token = token.clone();
+    state.commit(config)?;
+    Ok(token)
 }
 
 #[derive(Serialize)]
@@ -157,11 +171,14 @@ pub struct AppInfo {
     pub config_path: String,
     pub autostart_supported: bool,
     pub serial_supported: bool,
+    /// Port the local API is actually listening on, when it is running.
+    pub api_port: Option<u16>,
 }
 
 #[tauri::command]
-pub fn app_info() -> AppInfo {
+pub fn app_info(state: State<'_, AppState>) -> AppInfo {
     AppInfo {
+        api_port: state.api.lock().as_ref().map(|s| s.port()),
         version: String::from(env!("CARGO_PKG_VERSION")),
         platform: String::from(std::env::consts::OS),
         config_path: maslight_core::profile::config_path()

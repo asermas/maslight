@@ -55,6 +55,10 @@ etmek zorunda kalmıyor.
   doğrulayan birim testleri var.
 * **Otomatik cihaz keşfi.** mDNS ile bulur, sonra kontrolcüye kaç LED
   sürdüğünü sorar.
+* **Profilleri kendi değiştiren kurallar**: çalışan bir program, tam ekran bir
+  şey, saat aralığı ya da pilde olmak.
+* **Yerel REST ve WebSocket API**: loopback üzerinde, token arkasında, sen
+  açana kadar kapalı.
 * **Sisteme yük olmuyor.** Sabit ekranda yakalama hızı kendiliğinden düşüyor;
   tam hızda bile geri okunan şey masaüstünün tamamı değil, küçük bir görüntü.
 * **Hiçbir şey makineden çıkmıyor.** Hesap yok, analitik yok, çökme raporu yok.
@@ -97,6 +101,8 @@ yakalama arka ucu -> bölge indirgeyici -> renk hattı -> çıkış
 | `maslight-capture` | `CaptureBackend` trait'i + DXGI, X11, PipeWire ve sentetik kaynak. |
 | `maslight-output` | `Sink` trait'i + WLED, DDP, sACN, Art-Net, seri, keşif. |
 | `maslight-audio` | Loopback yakalama, spektrum analizi, beat tespiti, efektler. |
+| `maslight-rules` | Otomatik profil değişimi ve gereken platform sondaları. |
+| `maslight-api` | Yerel REST ve WebSocket sunucusu. |
 | `maslight-engine` | Döngü, profiller, telemetri, gecikme telafisi. |
 | `app/` | Tauri kabuğu ve React arayüzü. |
 
@@ -122,9 +128,6 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
   arkasında.
 * **macOS** için yakalama arka ucu yok. Uygulama derleniyor ama yakalayacak bir
   şey yok. Bu 0.3 hedefi.
-* **Kural motoru** 0.2. Ekranı var ve numara yapmak yerine durumu açıkça
-  söylüyor.
-* **Yerel REST ve WebSocket API** 0.2.
 * **Seri çıkış** yazıldı ve birim testleri var, ama feature bayrağının arkasında
   ve henüz gerçek donanımda denenmedi.
 
@@ -133,6 +136,7 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 * [Kurulum](docs/install.md)
 * [Linux: X11 ve Wayland](docs/linux.md)
 * [Ses modu](docs/audio.md)
+* [Yerel API](docs/api.md)
 * [Çıkış protokolleri](docs/protocols.md)
 * [Yerleşim modeli](docs/layout.md)
 * [Kaynaktan derleme](docs/building.md)

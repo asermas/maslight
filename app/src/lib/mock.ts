@@ -63,6 +63,7 @@ const config: AppConfig = {
     checkForUpdates: false,
     enableApi: false,
     apiPort: 4599,
+    apiToken: "demo-token-not-a-real-one",
   },
   profiles: [
     {
@@ -214,6 +215,7 @@ const info: AppInfo = {
   configPath: "(browser preview, nothing is saved)",
   autostartSupported: false,
   serialSupported: false,
+  apiPort: null,
 };
 
 function buildLayout(params: WizardParams): Layout {
@@ -271,6 +273,7 @@ export const mockBackend = {
   identify_led: async () => {},
   hold_color: async () => {},
   set_launch_at_login: async () => {},
+  regenerate_api_token: async () => "demo-token-not-a-real-one",
   app_info: async () => info,
   open_config_dir: async () => {},
 } as Record<string, (args: never) => Promise<unknown>>;
