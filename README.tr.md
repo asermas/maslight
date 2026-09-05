@@ -85,16 +85,36 @@ kimsenin şeridini tarif etmesi gerekmiyor.
 
 ## Kurulum
 
-[Releases](https://github.com/maslight/maslight/releases) sayfasından paketini
+[Releases](https://github.com/asermas/maslight/releases) sayfasından paketini
 indir; ayrıntılar [kurulum sayfasında](docs/install.md).
 
 Sonrası: kontrolcünü tara, her ekran kenarı için LED sayısını gir, üç adımlık
 kalibrasyonu çalıştır. Sönük şeritten çalışan şeride on dakika.
 
+### Şerit karanlık kalırsa
+
+Uygulamayı tamamen aradan çıkar ve kontrolcüyle doğrudan konuş:
+
+```bash
+cargo run -p maslight-output --example wledtest -- 192.168.0.200 64
+```
+
+Kontrolcüye ne olduğunu sorar, sonra kırmızı, yeşil, mavi, beyaz, koşan bir
+nokta ve siyah gönderir. Ne olduğu hangi yarıya bakman gerektiğini söyler:
+
+* **Hiçbir şey olmuyor.** Kontrolcü paketleri almıyor. Adresi ve arada UDP'yi
+  düşüren bir şey olup olmadığını kontrol et.
+* **Kırmızı yeşil çıkıyor.** Renk sırası yanlış; üçüncü argümanla dene:
+  `... -- 192.168.0.200 64 rgb`.
+* **Renkler doğru ama yerleri yanlış.** Şerit çalışıyor, yerleşim yanlış:
+  Yerleşim Stüdyosu ya da kamerayla keşif.
+* **Hepsi doğru.** Çıkış yolu sağlam; kalan sorun yakalama ya da renk
+  tarafında.
+
 ## Derleme
 
 ```sh
-git clone https://github.com/maslight/maslight
+git clone https://github.com/asermas/maslight
 cd maslight
 npm install --prefix app
 npm run build --prefix app

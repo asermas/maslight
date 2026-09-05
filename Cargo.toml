@@ -18,8 +18,8 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.82"
 license = "MIT"
-repository = "https://github.com/maslight/maslight"
-homepage = "https://github.com/maslight/maslight"
+repository = "https://github.com/asermas/maslight"
+homepage = "https://github.com/asermas/maslight"
 authors = ["MasLight contributors"]
 
 [workspace.dependencies]

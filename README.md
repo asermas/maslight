@@ -88,16 +88,37 @@ describe their strip at all.
 
 ## Install
 
-Grab a package from [Releases](https://github.com/maslight/maslight/releases),
+Grab a package from [Releases](https://github.com/asermas/maslight/releases),
 or see [the install page](docs/install.md).
 
 Then: scan for your controller, enter the LED count for each screen edge, and
 run the three step calibration. Ten minutes from a dark strip to a working one.
 
+### If the strip stays dark
+
+Take the whole application out of the picture and talk to the controller
+directly:
+
+```bash
+cargo run -p maslight-output --example wledtest -- 192.168.0.200 64
+```
+
+It asks the controller what it is, then sends red, green, blue, white, a
+running dot, and black. What happens tells you which half to look at:
+
+* **Nothing at all.** The controller is not receiving. Check the address, and
+  that nothing between the two machines drops UDP.
+* **Red comes out green.** The colour order is wrong. Pass one:
+  `... -- 192.168.0.200 64 rgb`.
+* **The right colours in the wrong places.** The strip works and the layout is
+  wrong, so go to Layout Studio or run camera discovery.
+* **All correct.** The output path is fine and anything still wrong is capture
+  or colour, which is upstream.
+
 ## Build
 
 ```sh
-git clone https://github.com/maslight/maslight
+git clone https://github.com/asermas/maslight
 cd maslight
 npm install --prefix app
 npm run build --prefix app

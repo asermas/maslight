@@ -34,7 +34,7 @@
     "longDescription": "MasLight drives addressable LED strips from what is on your screen. It speaks WLED UDP, DDP, sACN, Art-Net and Adalight, runs on Windows, Linux and macOS, and keeps everything on your own machine.",
     "copyright": "MasLight contributors, MIT licensed",
     "publisher": "MasLight",
-    "homepage": "https://github.com/maslight/maslight",
+    "homepage": "https://github.com/asermas/maslight",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
