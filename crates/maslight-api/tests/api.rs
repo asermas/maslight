@@ -330,6 +330,34 @@ fn the_token_is_thirty_two_characters_and_changes() {
 }
 
 #[test]
+fn tokens_do_not_repeat_and_do_not_lean_on_the_clock() {
+    // What this checks is the shape of the output: no repeats, and every
+    // position taking many different values. That is necessary but not
+    // sufficient, and worth being clear about. The property that actually
+    // matters is that a token cannot be predicted, and that comes from asking
+    // the operating system for randomness rather than deriving it from the
+    // clock and the process id. No unit test can demonstrate unpredictability;
+    // it follows from where the bytes come from, which is why the source is
+    // the thing to guard in review.
+    let tokens: Vec<String> = (0..1000).map(|_| maslight_api::generate_token()).collect();
+
+    let unique: std::collections::HashSet<&String> = tokens.iter().collect();
+    assert_eq!(unique.len(), tokens.len(), "tokens repeated");
+
+    for position in 0..32 {
+        let seen: std::collections::HashSet<char> = tokens
+            .iter()
+            .filter_map(|t| t.chars().nth(position))
+            .collect();
+        assert!(
+            seen.len() > 20,
+            "position {position} only ever took {} values, which is not random",
+            seen.len()
+        );
+    }
+}
+
+#[test]
 fn a_hex_colour_parses_and_rubbish_does_not() {
     assert_eq!(
         maslight_api::parse_hex("#ff8800"),

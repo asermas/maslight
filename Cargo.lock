@@ -2422,6 +2422,7 @@ name = "maslight-api"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "getrandom 0.3.4",
  "maslight-core",
  "maslight-engine",
  "serde",

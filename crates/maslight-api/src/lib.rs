@@ -164,7 +164,7 @@ fn authorise(state: &ApiState, headers: &HeaderMap, query: &TokenQuery) -> Resul
         .map(str::trim);
     let supplied = from_header.or(query.token.as_deref());
     match supplied {
-        Some(value) if value == state.token => Ok(()),
+        Some(value) if tokens_match(value, &state.token) => Ok(()),
         _ => Err(ApiError(
             StatusCode::UNAUTHORIZED,
             String::from("a valid token is required"),
@@ -356,24 +356,47 @@ pub fn parse_hex(value: &str) -> Option<Rgb8> {
 
 /// A token to put in the configuration the first time the API is enabled.
 ///
-/// Not cryptographic randomness: this guards a loopback socket against other
-/// programs on the same machine, and the system clock plus the process id is
-/// enough entropy for that. It is regenerated whenever the user asks.
+/// From the operating system's randomness. An earlier version derived this
+/// from the system clock and the process id and argued that was enough,
+/// because the only thing it defends against is other programs on the same
+/// machine. That argument is backwards: a program on this machine is exactly
+/// what can read the process id out of the process list and guess the launch
+/// time to the millisecond, which leaves a search space small enough to walk.
+/// The threat model was the reason to use real randomness, not to skip it.
+///
+/// 32 characters from a 36 character alphabet, so about 165 bits.
 pub fn generate_token() -> String {
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_nanos())
-        .unwrap_or(0);
-    let pid = std::process::id() as u128;
-    let mut value = now ^ (pid << 64) ^ 0x9e37_79b9_7f4a_7c15;
-    let alphabet = b"abcdefghijklmnopqrstuvwxyz0123456789";
-    let mut out = String::with_capacity(32);
-    for _ in 0..32 {
-        // A xorshift is plenty for spreading the seed across the characters.
-        value ^= value << 13;
-        value ^= value >> 7;
-        value ^= value << 17;
-        out.push(alphabet[(value % alphabet.len() as u128) as usize] as char);
+    let mut bytes = [0u8; 32];
+    if let Err(e) = getrandom::fill(&mut bytes) {
+        // The operating system refusing randomness is not something to paper
+        // over with a weaker token: say so, and let the caller see a token
+        // that is obviously not usable rather than one that looks fine.
+        tracing::error!(
+            "no randomness from the operating system ({e}); refusing to invent a token"
+        );
+        return String::new();
     }
-    out
+
+    let alphabet = b"abcdefghijklmnopqrstuvwxyz0123456789";
+    // 36 does not divide 256, so taking the remainder favours the first 220
+    // bytes very slightly. At this length that bias is worth far less than the
+    // simplicity, and every byte is still independent.
+    bytes
+        .iter()
+        .map(|b| alphabet[*b as usize % alphabet.len()] as char)
+        .collect()
+}
+
+/// Compare two tokens without leaking where they first differ.
+///
+/// The length is allowed to leak: tokens are a fixed length and that is not a
+/// secret. Only loopback can reach this, so the attack is remote in the
+/// technical sense rather than the practical one, but a credential comparison
+/// is a bad place to be clever about what is worth defending.
+fn tokens_match(supplied: &str, expected: &str) -> bool {
+    let (a, b) = (supplied.as_bytes(), expected.as_bytes());
+    if a.len() != b.len() {
+        return false;
+    }
+    a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
