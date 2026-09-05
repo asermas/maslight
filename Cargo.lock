@@ -2376,6 +2376,7 @@ dependencies = [
  "maslight-capture",
  "maslight-core",
  "maslight-output",
+ "maslight-rules",
  "parking_lot",
  "serde",
  "serde_json",
@@ -2394,6 +2395,16 @@ dependencies = [
  "serialport",
  "thiserror 2.0.20",
  "tracing",
+]
+
+[[package]]
+name = "maslight-rules"
+version = "0.1.0"
+dependencies = [
+ "maslight-core",
+ "serde",
+ "tracing",
+ "windows 0.62.2",
 ]
 
 [[package]]

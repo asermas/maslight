@@ -81,6 +81,18 @@ export function useMasLight(): Store {
     };
   }, []);
 
+  // A rule can switch the profile behind the interface. Follow it locally so
+  // the header matches what is actually running, but do not write it: the
+  // profile someone picked by hand is still the one that comes back.
+  useEffect(() => {
+    if (!status?.profileId) return;
+    setConfig((current) => {
+      if (!current || current.activeProfile === status.profileId) return current;
+      if (!current.profiles.some((p) => p.id === status.profileId)) return current;
+      return { ...current, activeProfile: status.profileId };
+    });
+  }, [status?.profileId]);
+
   const flush = useCallback(() => {
     const next = pending.current;
     pending.current = null;

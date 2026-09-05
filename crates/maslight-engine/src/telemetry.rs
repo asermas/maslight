@@ -53,6 +53,14 @@ pub struct EngineStatus {
     pub audio_active: bool,
     /// Overall loudness the audio engine last measured, 0..=1.
     pub audio_energy: f32,
+    /// The active profile was last chosen by a rule rather than by hand.
+    pub rule_switched: bool,
+    /// What the rule sampler last saw, so the rules screen can show why a
+    /// rule is or is not firing.
+    pub rule_fullscreen: bool,
+    pub rule_on_battery: bool,
+    /// Local time as minutes past midnight, from the same clock the rules use.
+    pub rule_minutes: u16,
     /// Total frames sent since start.
     pub frames: u64,
     pub last_error: Option<String>,
@@ -79,6 +87,10 @@ impl Default for EngineStatus {
             insets: [0.0; 4],
             audio_active: false,
             audio_energy: 0.0,
+            rule_switched: false,
+            rule_fullscreen: false,
+            rule_on_battery: false,
+            rule_minutes: 0,
             frames: 0,
             last_error: None,
         }

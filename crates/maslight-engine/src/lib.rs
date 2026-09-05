@@ -22,6 +22,7 @@ use maslight_core::{
     Rgb, Rgb8,
 };
 use maslight_output::{make_sink, Sink};
+use maslight_rules::RuleWatcher;
 use parking_lot::RwLock;
 
 mod telemetry;
@@ -145,6 +146,9 @@ struct Worker {
     /// Loopback capture and analysis, started only when a profile asks for it.
     audio: Option<AudioEngine>,
     audio_scratch: Vec<Rgb>,
+    /// Automatic profile switching. Polls the system every couple of seconds
+    /// and only speaks up when the answer changes.
+    rules: RuleWatcher,
     hold: Option<Rgb8>,
     identify_until: Option<(usize, Instant)>,
     dirty: bool,
@@ -171,6 +175,7 @@ impl Worker {
             delay: VecDeque::new(),
             audio: None,
             audio_scratch: Vec::new(),
+            rules: RuleWatcher::default(),
             hold: None,
             identify_until: None,
             dirty: true,
@@ -195,6 +200,9 @@ impl Worker {
                 Ok(Command::Apply(config)) => {
                     self.config = *config;
                     self.config.sanitise();
+                    // A new rule list has to be re-applied, or a rule someone
+                    // just wrote would wait for its condition to change.
+                    self.rules.reset();
                     self.dirty = true;
                 }
                 Ok(Command::SetEnabled(enabled)) => {
@@ -353,6 +361,7 @@ impl Worker {
         if self.dirty {
             self.rebuild();
         }
+        self.apply_rules();
         let profile = self.config.active().clone();
         let now = Instant::now();
         let dt = (now - self.last_tick).as_secs_f32().clamp(0.0001, 1.0);
@@ -538,6 +547,40 @@ impl Worker {
             self.sources.first().map(|s| s.insets.right).unwrap_or(0.0),
         ];
         let _ = budget;
+    }
+
+    /// Let the rules pick a profile.
+    ///
+    /// A switch here is deliberately not written to disk: it reflects what the
+    /// machine is doing right now, and the profile someone chose by hand stays
+    /// the one that comes back after a restart.
+    fn apply_rules(&mut self) {
+        if !self.config.enabled {
+            return;
+        }
+        let rules = self.config.rules.clone();
+        let matched = self.rules.poll(&rules);
+        {
+            let context = self.rules.context();
+            let mut status = self.status.write();
+            status.rule_fullscreen = context.fullscreen;
+            status.rule_on_battery = context.on_battery;
+            status.rule_minutes = context.minutes;
+        }
+        let Some(wanted) = matched else {
+            return;
+        };
+        if wanted == self.config.active_profile {
+            return;
+        }
+        if self.config.profile(&wanted).is_none() {
+            tracing::warn!("a rule asked for profile {wanted}, which does not exist");
+            return;
+        }
+        tracing::info!("rules switched to profile {wanted}");
+        self.config.active_profile = wanted;
+        self.dirty = true;
+        self.status.write().rule_switched = true;
     }
 
     /// Apply latency compensation and push to every sink.

@@ -228,6 +228,10 @@ export interface EngineStatus {
   insets: [number, number, number, number];
   audioActive: boolean;
   audioEnergy: number;
+  ruleSwitched: boolean;
+  ruleFullscreen: boolean;
+  ruleOnBattery: boolean;
+  ruleMinutes: number;
   frames: number;
   lastError: string | null;
 }

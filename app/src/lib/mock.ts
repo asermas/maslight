@@ -182,6 +182,10 @@ function status(): EngineStatus {
     insets: [0, 0, 0, 0],
     audioActive: false,
     audioEnergy: 0,
+    ruleSwitched: false,
+    ruleFullscreen: false,
+    ruleOnBattery: false,
+    ruleMinutes: 9 * 60 + 30,
     frames: Math.floor((Date.now() - started) / 16),
     lastError: null,
   };
