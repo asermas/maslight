@@ -61,8 +61,20 @@ export function useMasLight(): Store {
 
   // Status poll. A plain interval is right here: the payload is small and the
   // engine owns its own clock, so there is nothing to synchronise.
+  //
+  // It stops while the window is hidden, which is most of the time. MasLight
+  // lives in the tray: closing the window hides it and the engine keeps
+  // driving the lights. An interval that kept running would ask the engine for
+  // a frame five times a second and re-render a strip preview nobody can see,
+  // for as long as the application is open. Hiding the window fires
+  // visibilitychange, so there is no polling to notice that nobody is looking.
+  //
+  // Coming back ticks immediately rather than waiting out an interval, so the
+  // window is never showing a stale number when it appears.
   useEffect(() => {
     let alive = true;
+    let id = 0;
+
     const tick = () => {
       api
         .getStatus()
@@ -73,11 +85,25 @@ export function useMasLight(): Store {
           /* the engine restarts on its own; a missed poll is not an error */
         });
     };
-    tick();
-    const id = window.setInterval(tick, STATUS_INTERVAL_MS);
+
+    const start = () => {
+      if (id) return;
+      tick();
+      id = window.setInterval(tick, STATUS_INTERVAL_MS);
+    };
+    const stop = () => {
+      if (!id) return;
+      window.clearInterval(id);
+      id = 0;
+    };
+    const follow = () => (document.hidden ? stop() : start());
+
+    follow();
+    document.addEventListener("visibilitychange", follow);
     return () => {
       alive = false;
-      window.clearInterval(id);
+      stop();
+      document.removeEventListener("visibilitychange", follow);
     };
   }, []);
 
