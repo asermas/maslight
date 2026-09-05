@@ -76,6 +76,21 @@ update checking is off until you turn it on.
 
 ![Settings](../assets/screenshots/settings.png)
 
+## The real window
+
+The shots above are the interface on its own, which is what makes them
+consistent. This is the actual application running on Windows, driving a real
+DXGI capture at 59 frames a second:
+
+![The MasLight window running on Windows](../assets/screenshots/app-window.png)
+
+The device is reporting **no answer**, which is worth showing rather than
+hiding. Frames are being sent and nothing on the network is replying, and a
+sink transmitting into a void looks exactly like a working one unless
+something checks. That is the difference between a strip that is dark because
+the controller is off and a strip that is dark because MasLight is broken, and
+it is the first question anybody asks.
+
 ## Regenerating these
 
 The app reads a fragment on startup, so each screen can be opened directly.
