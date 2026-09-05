@@ -64,7 +64,7 @@ without the file there is nothing to look at. A healthy start looks like this:
 ```text
 INFO maslight_app: configuration read from ...\config.json (20688 bytes on disk, 1 profile(s))
 INFO maslight_app: profile "Desk" (desk), mode Screen, 64 leds, 1 device(s), enabled true
-INFO maslight_capture::dxgi: DXGI capture on \.\DISPLAY1 at 1920x1080, reading back 240x135 from mip 3
+INFO maslight_capture::dxgi: DXGI capture on \\.\DISPLAY1 at 1920x1080, reading back 240x135 from mip 3
 ```
 
 If the profile line says `"Default" (default), 0 leds`, MasLight is not reading
