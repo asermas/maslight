@@ -68,13 +68,17 @@ jobs:
         run: npm run tauri build
         working-directory: app
 
+      # This is a Cargo workspace, so the target directory belongs to the
+      # workspace root and not to the crate being built. Looking under
+      # app/src-tauri found nothing, and the trailing || true hid that, so the
+      # only symptom was the upload complaining about an empty path.
       - name: What came out
         shell: bash
         run: |
-          find app/src-tauri/target/release/bundle -type f \
+          find target/release/bundle -type f \
             \( -name '*.msi' -o -name '*.exe' -o -name '*.deb' \
                -o -name '*.rpm' -o -name '*.AppImage' \) \
-            -printf '%f  %s bytes\n' || true
+            -printf '%f  %s bytes\n'
 
       - uses: actions/upload-artifact@v4
         with:
@@ -82,8 +86,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: |
-            app/src-tauri/target/release/bundle/**/*.msi
-            app/src-tauri/target/release/bundle/**/*-setup.exe
-            app/src-tauri/target/release/bundle/**/*.deb
-            app/src-tauri/target/release/bundle/**/*.rpm
-            app/src-tauri/target/release/bundle/**/*.AppImage
+            target/release/bundle/**/*.msi
+            target/release/bundle/**/*-setup.exe
+            target/release/bundle/**/*.deb
+            target/release/bundle/**/*.rpm
+            target/release/bundle/**/*.AppImage
