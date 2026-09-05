@@ -154,6 +154,8 @@ export type DeviceConfig =
       subnet: number;
     }
   | { kind: "serial"; port: string; baud: number; protocol: SerialProtocol }
+  | { kind: "open-rgb"; host: string; port: number; device: number }
+  | { kind: "mqtt"; host: string; port: number; topic: string }
   | { kind: "null" };
 
 export interface Profile {
@@ -333,6 +335,10 @@ export function deviceLabel(device: DeviceConfig): string {
       return `Art-Net ${device.host} u${device.universe}`;
     case "serial":
       return `Serial ${device.port}`;
+    case "open-rgb":
+      return `OpenRGB ${device.host} device ${device.device}`;
+    case "mqtt":
+      return `MQTT ${device.host} ${device.topic}`;
     default:
       return "Disconnected";
   }

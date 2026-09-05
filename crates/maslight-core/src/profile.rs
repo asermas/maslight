@@ -101,6 +101,24 @@ pub enum DeviceConfig {
         #[serde(default)]
         protocol: SerialProtocol,
     },
+    /// An OpenRGB server, which in turn drives motherboard headers, RAM,
+    /// keyboards and anything else it knows about.
+    OpenRgb {
+        host: String,
+        #[serde(default = "openrgb_port")]
+        port: u16,
+        /// Which device on that server. OpenRGB numbers them from zero.
+        #[serde(default)]
+        device: u32,
+    },
+    /// An MQTT broker, for home automation. Publishes state, not frames.
+    Mqtt {
+        host: String,
+        #[serde(default = "mqtt_port")]
+        port: u16,
+        #[serde(default = "mqtt_topic")]
+        topic: String,
+    },
     /// Discards frames. Used by tests, the preview and the calibration
     /// wizard before a device is chosen.
     Null,
@@ -124,6 +142,15 @@ fn one_u16() -> u16 {
 fn serial_baud() -> u32 {
     115_200
 }
+fn openrgb_port() -> u16 {
+    6742
+}
+fn mqtt_port() -> u16 {
+    1883
+}
+fn mqtt_topic() -> String {
+    String::from("maslight/state")
+}
 
 impl DeviceConfig {
     /// Short human label for the UI and logs.
@@ -139,6 +166,10 @@ impl DeviceConfig {
             },
             DeviceConfig::ArtNet { host, universe, .. } => format!("Art-Net {host} u{universe}"),
             DeviceConfig::Serial { port, .. } => format!("Serial {port}"),
+            DeviceConfig::OpenRgb { host, device, .. } => {
+                format!("OpenRGB {host} device {device}")
+            }
+            DeviceConfig::Mqtt { host, topic, .. } => format!("MQTT {host} {topic}"),
             DeviceConfig::Null => String::from("Disconnected"),
         }
     }

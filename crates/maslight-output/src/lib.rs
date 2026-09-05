@@ -14,6 +14,8 @@ use maslight_core::{ColorOrder, DeviceConfig, LedFrame, Rgb8, WledProtocol};
 pub mod artnet;
 pub mod ddp;
 pub mod e131;
+pub mod mqtt;
+pub mod openrgb;
 pub mod serial;
 pub mod wled;
 
@@ -126,6 +128,12 @@ pub fn make_sink(config: &DeviceConfig, order: ColorOrder) -> Result<Box<dyn Sin
         )?)),
         #[cfg(not(feature = "serial"))]
         DeviceConfig::Serial { .. } => Err(OutputError::Unsupported("serial output")),
+        DeviceConfig::OpenRgb { host, port, device } => Ok(Box::new(
+            openrgb::OpenRgbSink::connect(host, *port, *device, order)?,
+        )),
+        DeviceConfig::Mqtt { host, port, topic } => {
+            Ok(Box::new(mqtt::MqttSink::connect(host, *port, topic)?))
+        }
         DeviceConfig::Null => Ok(Box::new(NullSink::default())),
     }
 }
@@ -143,7 +151,7 @@ fn bind_udp(target: &SocketAddr) -> Result<UdpSocket, OutputError> {
     Ok(socket)
 }
 
-fn resolve(host: &str, port: u16) -> Result<SocketAddr, OutputError> {
+pub(crate) fn resolve(host: &str, port: u16) -> Result<SocketAddr, OutputError> {
     // A bare IP is the common case and needs no resolver at all.
     if let Ok(ip) = host.parse::<std::net::IpAddr>() {
         return Ok(SocketAddr::new(ip, port));

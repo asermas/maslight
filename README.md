@@ -56,7 +56,8 @@ describe their strip at all.
   edge, then drag individual LEDs. Multiple monitors, off screen LEDs, gaps in
   the chain, reversed strips and RGBW are all part of the model.
 * **Every common protocol**, with unit tests asserting the exact bytes on the
-  wire.
+  wire: WLED UDP, DDP, sACN, Art-Net, Adalight, TPM2, OpenRGB, and MQTT for
+  home automation.
 * **Automatic device discovery** over mDNS, then a question to the controller
   about how many LEDs it drives.
 * **Rules that switch profiles on their own**: a running program, something

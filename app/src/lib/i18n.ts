@@ -119,6 +119,11 @@ const en = {
   "devices.probe": "Check",
   "devices.ledCount": "LEDs reported",
   "devices.useIt": "Use this controller",
+  "devices.rgbDevice": "Device number",
+  "devices.rgbDeviceHint": "OpenRGB numbers its devices from zero.",
+  "devices.topic": "Topic",
+  "devices.topicHint":
+    "MasLight publishes a small state object here twice a second. It is not a frame stream.",
   "devices.sending": "Sending",
   "devices.noAnswer": "No answer",
   "devices.noAnswerHint":
@@ -435,6 +440,11 @@ const tr: Record<keyof typeof en, string> = {
   "devices.probe": "Kontrol et",
   "devices.ledCount": "Bildirilen LED",
   "devices.useIt": "Bu kontrolcüyü kullan",
+  "devices.rgbDevice": "Cihaz numarası",
+  "devices.rgbDeviceHint": "OpenRGB cihazlarını sıfırdan numaralandırır.",
+  "devices.topic": "Konu",
+  "devices.topicHint":
+    "MasLight buraya saniyede iki kez küçük bir durum nesnesi yayınlar. Kare akışı değildir.",
   "devices.sending": "Gönderiliyor",
   "devices.noAnswer": "Cevap yok",
   "devices.noAnswerHint":

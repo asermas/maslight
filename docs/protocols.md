@@ -64,6 +64,47 @@ Port 6454, ArtDmx opcode 0x5000. Also 512 slots per universe. The port address
 is assembled from net, subnet and universe as Art-Net 4 specifies, and the slot
 count is padded to an even number because the specification requires it.
 
+## OpenRGB
+
+Port 6742. OpenRGB drives motherboard headers, RAM, keyboards, fans and a long
+list of other hardware, so speaking its SDK covers all of it with one
+integration.
+
+Every packet carries the same sixteen byte header: `ORGB`, the device index,
+the packet id, and the payload length, all little endian. MasLight sends two
+packets on connect, `SetClientName` so a human can see who is driving their
+lights and `SetCustomMode` because a device left in an effect mode ignores
+colours, and then `UpdateLeds` per frame.
+
+Colours are four bytes each: red, green, blue, and a padding byte the protocol
+reserves. Getting that stride wrong shifts every LED, which looks like a
+working connection showing rubbish, so the tests assert it.
+
+## MQTT
+
+Port 1883, and **not a frame stream**. Sixty LEDs sixty times a second is a
+thousand messages a second, which is not what a broker is for and not what
+anything subscribing actually wants.
+
+MasLight instead publishes a small retained JSON object twice a second:
+
+```json
+{
+  "state": "ON",
+  "leds": 64,
+  "color": { "r": 127, "g": 0, "b": 127 },
+  "hex": "#7f007f"
+}
+```
+
+Retained, so a subscriber that connects later learns the current state rather
+than waiting for the next tick. A repeat becomes a ping rather than another
+publish, so a still screen does not wake anything downstream.
+
+The client is a hand written MQTT 3.1.1 publisher: a CONNECT packet and a
+PUBLISH at quality of service zero, which is two packet shapes rather than a
+dependency.
+
 ## Adalight and TPM2
 
 For a directly attached Arduino or ESP over USB.

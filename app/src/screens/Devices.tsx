@@ -32,6 +32,8 @@ const DEFAULTS: Record<Kind, DeviceConfig> = {
     subnet: 0,
   },
   serial: { kind: "serial", port: "", baud: 115200, protocol: "adalight" },
+  "open-rgb": { kind: "open-rgb", host: "", port: 6742, device: 0 },
+  mqtt: { kind: "mqtt", host: "", port: 1883, topic: "maslight/state" },
   null: { kind: "null" },
 };
 
@@ -198,6 +200,8 @@ export function Devices({ store }: { store: Store }) {
               <option value="e131">sACN (E1.31)</option>
               <option value="art-net">Art-Net</option>
               <option value="serial">Adalight / TPM2</option>
+              <option value="open-rgb">OpenRGB</option>
+              <option value="mqtt">MQTT</option>
             </select>
           </Field>
 
@@ -223,7 +227,9 @@ export function Devices({ store }: { store: Store }) {
             </Field>
           ) : draft.kind === "wled" ||
             draft.kind === "ddp" ||
-            draft.kind === "art-net" ? (
+            draft.kind === "art-net" ||
+            draft.kind === "open-rgb" ||
+            draft.kind === "mqtt" ? (
             <Field label={t("devices.host")}>
               <input
                 type="text"
@@ -272,6 +278,27 @@ export function Devices({ store }: { store: Store }) {
                 />
               </Field>
             </>
+          )}
+
+          {draft.kind === "open-rgb" && (
+            <Field label={t("devices.rgbDevice")} hint={t("devices.rgbDeviceHint")}>
+              <NumberInput
+                value={draft.device}
+                min={0}
+                max={255}
+                onChange={(v) => setDraft({ ...draft, device: Math.round(v) })}
+              />
+            </Field>
+          )}
+
+          {draft.kind === "mqtt" && (
+            <Field label={t("devices.topic")} hint={t("devices.topicHint")}>
+              <input
+                type="text"
+                value={draft.topic}
+                onChange={(e) => setDraft({ ...draft, topic: e.target.value })}
+              />
+            </Field>
           )}
 
           {(draft.kind === "e131" || draft.kind === "art-net") && (

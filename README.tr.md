@@ -53,8 +53,9 @@ kimsenin şeridini tarif etmesi gerekmiyor.
 * **Serbest yerleşim editörü.** Kenar başına LED sayısından yerleşim üret,
   sonra LED'leri tek tek sürükle. Çoklu monitör, ekran dışı LED'ler, zincirdeki
   boşluklar, ters takılmış şerit ve RGBW modelin parçası.
-* **Yaygın protokollerin hepsi.** Her birinin tel üzerindeki baytlarını
-  doğrulayan birim testleri var.
+* **Yaygın protokollerin hepsi.** Tel üzerindeki baytlarını doğrulayan birim
+  testleriyle: WLED UDP, DDP, sACN, Art-Net, Adalight, TPM2, OpenRGB ve ev
+  otomasyonu için MQTT.
 * **Otomatik cihaz keşfi.** mDNS ile bulur, sonra kontrolcüye kaç LED
   sürdüğünü sorar.
 * **Profilleri kendi değiştiren kurallar**: çalışan bir program, tam ekran bir
