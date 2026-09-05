@@ -1,0 +1,83 @@
+name: Packages
+
+# Building the application and packaging it are different things, and only the
+# first one was ever tested. The CI workflow compiles maslight-app, which
+# proves the code is sound and proves nothing about whether an installer comes
+# out the other end: a missing icon size, a bundle identifier the linker
+# rejects, or a Debian dependency that does not exist are all invisible until
+# something actually runs the bundler.
+#
+# This does. It produces the real installers and keeps them as artifacts,
+# without creating a release, so the packaging path can be exercised whenever
+# it changes rather than for the first time during a release.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app/src-tauri/**"
+      - "app/package.json"
+      - ".github/workflows/package.yml"
+
+jobs:
+  package:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows installers
+          - os: ubuntu-22.04
+            label: Linux packages
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      # rpm is needed for the .rpm target and is not on the runner by default.
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
+            librsvg2-dev libxdo-dev libssl-dev libasound2-dev \
+            libx11-dev libxcb1-dev libxcb-shm0-dev libxcb-randr0-dev \
+            build-essential pkg-config rpm
+
+      - run: npm ci
+        working-directory: app
+
+      - name: Bundle
+        run: npm run tauri build
+        working-directory: app
+
+      - name: What came out
+        shell: bash
+        run: |
+          find app/src-tauri/target/release/bundle -type f \
+            \( -name '*.msi' -o -name '*.exe' -o -name '*.deb' \
+               -o -name '*.rpm' -o -name '*.AppImage' \) \
+            -printf '%f  %s bytes\n' || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maslight-${{ runner.os }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            app/src-tauri/target/release/bundle/**/*.msi
+            app/src-tauri/target/release/bundle/**/*-setup.exe
+            app/src-tauri/target/release/bundle/**/*.deb
+            app/src-tauri/target/release/bundle/**/*.rpm
+            app/src-tauri/target/release/bundle/**/*.AppImage
