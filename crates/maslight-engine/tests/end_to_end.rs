@@ -277,3 +277,40 @@ fn an_unreachable_device_does_not_stop_the_engine() {
         "the working device should still be connected"
     );
 }
+
+/// Capture that will not start must be tried again, not given up on.
+///
+/// This is the failure this test was written for: if `start` failed once, the
+/// engine kept no sources, carried on with nothing to read, and the lights
+/// stayed dark until somebody changed a setting or restarted the application.
+/// The causes are all temporary. Desktop Duplication is exclusive per output,
+/// so a previous instance still shutting down, a game in exclusive fullscreen
+/// or a driver reset all make start fail for a few seconds and then stop
+/// mattering.
+#[test]
+fn capture_that_refuses_to_start_is_tried_again() {
+    // Two failures, then the backend behaves. The engine should get there on
+    // its own without anyone touching the configuration.
+    maslight_capture::test_source::fail_next_starts(2);
+
+    let engine = EngineHandle::spawn(config_with(test_profile(vec![DeviceConfig::Null])));
+
+    // Long enough for two retries at the engine's interval, and no longer.
+    let status = wait_for(Duration::from_secs(12), || {
+        let s = engine.status();
+        (s.capture_backend != "none" && s.leds.iter().any(|c| c.r > 0 || c.g > 0 || c.b > 0))
+            .then_some(s)
+    })
+    .expect("the engine never retried a capture that failed to start");
+
+    assert_eq!(
+        maslight_capture::test_source::remaining_failing_starts(),
+        0,
+        "both failures should have been spent on real attempts"
+    );
+    assert!(status.running);
+    assert_eq!(
+        status.capture_backend, "Test",
+        "the backend should be the one that eventually started"
+    );
+}

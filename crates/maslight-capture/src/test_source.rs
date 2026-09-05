@@ -5,11 +5,36 @@
 //! connected. It produces a deterministic moving pattern, so a test can assert
 //! on exact colours.
 
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
 use maslight_core::{CaptureBackendKind, CaptureSettings, FrameView, PixelFormat};
 
 use crate::{CaptureBackend, CaptureError, DisplayInfo, FrameStatus};
+
+/// How many more calls to `start` should fail before one is allowed to work.
+///
+/// A capture backend that refuses to start is ordinary: Desktop Duplication is
+/// exclusive per output, so a previous instance still shutting down, a game in
+/// exclusive fullscreen or a driver reset all make it fail for a few seconds.
+/// The engine has to come back and try again rather than leaving the lights
+/// dark forever, and that behaviour cannot be tested without a backend that
+/// fails on demand.
+///
+/// Process-wide because the engine owns its backend on its own thread and
+/// there is no seam to hand one in. Tests that use it should not run in
+/// parallel with other engine tests, which is what `--test-threads` is for.
+static FAILING_STARTS: AtomicU32 = AtomicU32::new(0);
+
+/// Make the next `n` attempts to start a test backend fail.
+pub fn fail_next_starts(n: u32) {
+    FAILING_STARTS.store(n, Ordering::SeqCst);
+}
+
+/// How many failures are still owed, for a test to assert they were used up.
+pub fn remaining_failing_starts() -> u32 {
+    FAILING_STARTS.load(Ordering::SeqCst)
+}
 
 /// What the synthetic display shows.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -119,6 +144,15 @@ impl CaptureBackend for TestBackend {
         _display: Option<&str>,
         _settings: &CaptureSettings,
     ) -> Result<(), CaptureError> {
+        // Owed a failure? Spend one. See FAILING_STARTS.
+        if FAILING_STARTS
+            .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |n| n.checked_sub(1))
+            .is_ok()
+        {
+            return Err(CaptureError::Platform(String::from(
+                "the test backend was asked to fail this start",
+            )));
+        }
         self.started = true;
         self.frame = 0;
         Ok(())
