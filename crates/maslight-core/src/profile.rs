@@ -458,12 +458,25 @@ impl AppConfig {
     }
 
     /// Write atomically: a crash mid-save must never leave a truncated config.
+    ///
+    /// Rename is the atomic part, but renaming a file whose contents are still
+    /// in the page cache only guarantees that one of the two *names* survives,
+    /// not that the bytes behind the new one do. Losing power in that window
+    /// leaves a config.json of the right name and zero length, which is worse
+    /// than leaving the old one alone. So the data is on the disk before the
+    /// rename makes it the real file.
     pub fn save_to(&self, path: &Path) -> Result<(), ConfigError> {
+        use std::io::Write;
+
         if let Some(dir) = path.parent() {
             std::fs::create_dir_all(dir)?;
         }
         let tmp = path.with_extension("json.tmp");
-        std::fs::write(&tmp, serde_json::to_string_pretty(self)?)?;
+        {
+            let mut file = std::fs::File::create(&tmp)?;
+            file.write_all(serde_json::to_string_pretty(self)?.as_bytes())?;
+            file.sync_all()?;
+        }
         std::fs::rename(&tmp, path)?;
         Ok(())
     }
