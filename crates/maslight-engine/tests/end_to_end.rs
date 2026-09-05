@@ -69,8 +69,24 @@ fn wait_for<T>(timeout: Duration, mut f: impl FnMut() -> Option<T>) -> Option<T>
     None
 }
 
+/// Serialises the tests in this file.
+///
+/// One of them makes the synthetic capture backend refuse to start, and that
+/// switch is process-wide: the engine owns its backend on its own thread and
+/// there is no seam to hand one in. Cargo runs tests in a binary in parallel
+/// by default, so without this another test would consume the injected
+/// failures and fail for a reason that has nothing to do with what it checks.
+///
+/// A poisoned lock is not interesting here: a panic in one test should not
+/// turn every later one into a second failure that hides it.
+fn serial() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 #[test]
 fn the_engine_lights_leds_from_the_synthetic_screen() {
+    let _serial = serial();
     let engine = EngineHandle::spawn(config_with(test_profile(vec![DeviceConfig::Null])));
 
     let status = wait_for(Duration::from_secs(5), || {
@@ -96,6 +112,7 @@ fn the_engine_lights_leds_from_the_synthetic_screen() {
 
 #[test]
 fn frames_reach_the_wire_as_valid_wled_packets() {
+    let _serial = serial();
     // Bind first so the port is known and nothing is missed.
     let listener = UdpSocket::bind("127.0.0.1:0").expect("bind failed");
     listener
@@ -131,6 +148,7 @@ fn frames_reach_the_wire_as_valid_wled_packets() {
 
 #[test]
 fn disabling_the_engine_blacks_the_strip_out() {
+    let _serial = serial();
     let listener = UdpSocket::bind("127.0.0.1:0").expect("bind failed");
     listener
         .set_read_timeout(Some(Duration::from_secs(5)))
@@ -179,6 +197,7 @@ fn disabling_the_engine_blacks_the_strip_out() {
 
 #[test]
 fn identify_drives_a_single_led_for_the_calibration_wizard() {
+    let _serial = serial();
     let engine = EngineHandle::spawn(config_with(test_profile(vec![DeviceConfig::Null])));
     wait_for(Duration::from_secs(5), || {
         (engine.status().leds.len() == 4).then_some(())
@@ -203,6 +222,7 @@ fn identify_drives_a_single_led_for_the_calibration_wizard() {
 
 #[test]
 fn a_held_colour_overrides_capture() {
+    let _serial = serial();
     let engine = EngineHandle::spawn(config_with(test_profile(vec![DeviceConfig::Null])));
     engine.hold_color(Some(maslight_core::Rgb8::new(10, 20, 30)));
 
@@ -219,6 +239,7 @@ fn a_held_colour_overrides_capture() {
 
 #[test]
 fn applying_a_new_profile_resizes_the_chain_without_restarting() {
+    let _serial = serial();
     let engine = EngineHandle::spawn(config_with(test_profile(vec![DeviceConfig::Null])));
     wait_for(Duration::from_secs(5), || {
         (engine.status().led_count == 4).then_some(())
@@ -249,6 +270,7 @@ fn applying_a_new_profile_resizes_the_chain_without_restarting() {
 
 #[test]
 fn an_unreachable_device_does_not_stop_the_engine() {
+    let _serial = serial();
     // Port 1 on localhost has nothing listening. UDP will not error on send,
     // but the profile also carries a serial device that cannot open, which is
     // the failure path we care about.
@@ -289,6 +311,7 @@ fn an_unreachable_device_does_not_stop_the_engine() {
 /// mattering.
 #[test]
 fn capture_that_refuses_to_start_is_tried_again() {
+    let _serial = serial();
     // Two failures, then the backend behaves. The engine should get there on
     // its own without anyone touching the configuration.
     maslight_capture::test_source::fail_next_starts(2);

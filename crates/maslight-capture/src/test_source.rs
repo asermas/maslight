@@ -22,8 +22,9 @@ use crate::{CaptureBackend, CaptureError, DisplayInfo, FrameStatus};
 /// fails on demand.
 ///
 /// Process-wide because the engine owns its backend on its own thread and
-/// there is no seam to hand one in. Tests that use it should not run in
-/// parallel with other engine tests, which is what `--test-threads` is for.
+/// there is no seam to hand one in, so anything using this has to make sure no
+/// other test is starting a capture at the same time. The engine's end to end
+/// tests take a lock for exactly that reason.
 static FAILING_STARTS: AtomicU32 = AtomicU32::new(0);
 
 /// Make the next `n` attempts to start a test backend fail.
