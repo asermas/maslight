@@ -126,10 +126,17 @@ export default function App() {
           {NAV.map((item) => {
             const Icon = item.icon;
             return (
+              // Below 900px the sidebar collapses and the CSS hides the
+              // label, which would leave a button with nothing but a hidden
+              // icon inside it and no name at all. The aria-label survives
+              // that, and the title gives the icon rail the tooltip it needs
+              // for anyone who cannot guess the glyph.
               <button
                 key={item.id}
                 className="nav-item"
                 aria-current={screen === item.id ? "page" : undefined}
+                aria-label={t(item.key)}
+                title={t(item.key)}
                 onClick={() => setScreen(item.id)}
               >
                 <Icon size={17} weight={screen === item.id ? "fill" : "regular"} />

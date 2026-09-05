@@ -20,7 +20,10 @@
   --ink: #f7f8f8;
   --ink-muted: #d0d6e0;
   --ink-subtle: #8a8f98;
-  --ink-tertiary: #62666d;
+  /* Tertiary is the dimmest text in the interface, which makes it the one
+     worth checking: at 11.5px it still has to clear 4.5:1 against the
+     background. #62666d was 3.45:1 and failed. This is 4.7:1. */
+  --ink-tertiary: #767b84;
 
   /* The single chromatic accent. */
   --accent: #4da6ff;
@@ -77,9 +80,12 @@
   --ink: #08090a;
   --ink-muted: #3c4149;
   --ink-subtle: #62666d;
-  --ink-tertiary: #8a8f98;
+  /* Same check on the light side: #8a8f98 on white was 3.25:1. This is 5:1. */
+  --ink-tertiary: #6b7078;
 
-  --accent: #0b72d6;
+  /* Was #0b72d6, which measured 4.49:1 against the light card surface: a
+     hair under AA, and the script editor sets whole keywords in it. */
+  --accent: #0b6ecd;
   --accent-hover: #0a63bb;
   --accent-press: #095299;
   --on-accent: #ffffff;

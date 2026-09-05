@@ -10,33 +10,47 @@
 
 #![cfg(target_os = "linux")]
 
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use maslight_capture::{create_backend, FrameStatus};
 use maslight_core::layout::Rect;
 use maslight_core::{CaptureBackendKind, CaptureSettings, Insets, Reducer, Rgb};
+use x11rb::connection::Connection;
 use x11rb::rust_connection::RustConnection;
 
 fn enabled() -> bool {
     std::env::var("MASLIGHT_X11_TEST").as_deref() == Ok("1") && std::env::var("DISPLAY").is_ok()
 }
 
-/// Paint the whole root window one colour.
+/// One connection, opened once, never closed.
 ///
-/// The connection comes back with the size, and the caller has to keep it
-/// alive. This is not tidiness, it is the whole reason an earlier version of
-/// this test failed on CI: an X server resets itself when its **last** client
-/// disconnects, and part of a reset is repainting the root window with its
-/// default background. Under Xvfb there is no window manager and no desktop,
-/// so the painting client is usually the only client. Dropping the connection
-/// here therefore erased the red before the capture backend could connect, and
-/// the reducer correctly reported black.
-fn paint_root(colour: u32) -> Result<(RustConnection, u16, u16), String> {
-    use x11rb::connection::Connection;
+/// An X server resets itself when its **last** client disconnects: it drops
+/// every connection and repaints the root window with its default background.
+/// Under Xvfb there is no window manager and no desktop, so whichever client
+/// this test binary happens to have open is usually the only one, and every
+/// gap between connections is a reset.
+///
+/// That cost two separate CI failures. First the painting connection was
+/// dropped on return, so the server wiped the red before the capture backend
+/// could connect and the reducer correctly reported black. Fixing that by
+/// holding the painter alive only moved the problem: the painter now died at
+/// the end of the first test, and the second test connected into the middle of
+/// the reset and got `Connection reset by peer`.
+///
+/// A static is never dropped, so this client outlives every test in the binary
+/// and the server has no reason to reset while any of them are running.
+fn keepalive() -> &'static (RustConnection, usize) {
+    static CONN: OnceLock<(RustConnection, usize)> = OnceLock::new();
+    CONN.get_or_init(|| x11rb::connect(None).expect("could not open the keepalive connection"))
+}
+
+/// Paint the whole root window one colour.
+fn paint_root(colour: u32) -> Result<(u16, u16), String> {
     use x11rb::protocol::xproto::{ConnectionExt, CreateGCAux, Rectangle};
 
-    let (conn, screen_num) = x11rb::connect(None).map_err(|e| e.to_string())?;
-    let screen = &conn.setup().roots[screen_num];
+    let (conn, screen_num) = keepalive();
+    let screen = &conn.setup().roots[*screen_num];
     let root = screen.root;
     let width = screen.width_in_pixels;
     let height = screen.height_in_pixels;
@@ -63,7 +77,7 @@ fn paint_root(colour: u32) -> Result<(RustConnection, u16, u16), String> {
 
     conn.free_gc(gc).map_err(|e| e.to_string())?;
     conn.flush().map_err(|e| e.to_string())?;
-    Ok((conn, width, height))
+    Ok((width, height))
 }
 
 #[test]
@@ -73,11 +87,8 @@ fn x11_capture_reads_what_is_on_the_root_window() {
         return;
     }
 
-    // Pure red, so a channel swap in the backend cannot pass unnoticed. The
-    // connection is bound rather than dropped so the server does not reset and
-    // wipe the paint; see paint_root.
-    let (_painter, width, height) =
-        paint_root(0x00ff_0000).expect("could not paint the root window");
+    // Pure red, so a channel swap in the backend cannot pass unnoticed.
+    let (width, height) = paint_root(0x00ff_0000).expect("could not paint the root window");
 
     let mut backend =
         create_backend(CaptureBackendKind::X11).expect("no X11 backend on this display");
@@ -137,6 +148,9 @@ fn x11_capture_survives_a_stop_and_a_restart() {
         eprintln!("skipped: set MASLIGHT_X11_TEST=1 with a DISPLAY to run this");
         return;
     }
+    // Hold the server open for the duration; see keepalive.
+    keepalive();
+
     let mut backend = create_backend(CaptureBackendKind::X11).expect("no X11 backend");
     let settings = CaptureSettings::default();
 

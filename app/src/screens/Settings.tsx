@@ -46,7 +46,7 @@ export function Settings({ store }: { store: Store }) {
               onChange={(language) => setUi({ language })}
               options={[
                 { value: "system", label: t("common.automatic") },
-                { value: "tr", label: "Turkce" },
+                { value: "tr", label: "Türkçe" },
                 { value: "en", label: "English" },
               ]}
             />
