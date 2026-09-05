@@ -26,6 +26,13 @@ use maslight_output::{make_sink, Sink};
 use maslight_rules::RuleWatcher;
 use parking_lot::RwLock;
 
+/// How long to wait before trying capture again when it would not start.
+///
+/// Long enough that a failing display is not hammered sixty times a second,
+/// short enough that the lights come back on their own while somebody is still
+/// looking at them.
+const CAPTURE_RETRY: Duration = Duration::from_secs(2);
+
 mod telemetry;
 pub use telemetry::{DeviceStatus, EngineStatus};
 
@@ -167,6 +174,17 @@ struct Worker {
     pattern: Option<Vec<bool>>,
     identify_until: Option<(usize, Instant)>,
     dirty: bool,
+    /// When to try building capture again after it would not start.
+    ///
+    /// A capture session that dies mid-run already rebuilds itself, but one
+    /// that never starts used to be permanent: sources stayed empty, the loop
+    /// carried on with nothing to read, and the lights stayed dark until
+    /// somebody changed a setting or restarted the application. The causes are
+    /// all temporary. Desktop Duplication is exclusive per output, so a
+    /// previous instance still shutting down, a game in exclusive fullscreen
+    /// or a driver reset all make start fail for a few seconds and then stop
+    /// mattering.
+    retry_at: Option<Instant>,
     last_tick: Instant,
     fps_window: VecDeque<Instant>,
     idle_frames: u32,
@@ -197,6 +215,7 @@ impl Worker {
             pattern: None,
             identify_until: None,
             dirty: true,
+            retry_at: None,
             last_tick: Instant::now(),
             fps_window: VecDeque::new(),
             idle_frames: 0,
@@ -397,9 +416,27 @@ impl Worker {
         status.source_height = size.1;
         status.last_error = capture_error;
         status.running = true;
+        drop(status);
+
+        // Wanted a screen and did not get one: come back and try again.
+        let wanted_capture = matches!(profile.mode, LightMode::Screen)
+            && self.config.enabled
+            && !profile.layout.is_empty();
+        self.retry_at = if wanted_capture && self.sources.is_empty() {
+            Some(Instant::now() + CAPTURE_RETRY)
+        } else {
+            None
+        };
     }
 
     fn tick(&mut self) {
+        if let Some(at) = self.retry_at {
+            if Instant::now() >= at {
+                tracing::info!("capture never started, trying again");
+                self.retry_at = None;
+                self.dirty = true;
+            }
+        }
         if self.dirty {
             self.rebuild();
         }

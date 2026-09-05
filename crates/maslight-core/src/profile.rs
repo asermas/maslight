@@ -468,19 +468,149 @@ impl AppConfig {
         Ok(())
     }
 
-    /// Load from the default location, falling back to defaults when the file
-    /// does not exist yet.
-    pub fn load_or_default() -> Self {
-        let path = config_path();
-        match AppConfig::load_from(&path) {
-            Ok(cfg) => cfg,
-            Err(_) => {
-                let mut cfg = AppConfig::default();
-                cfg.sanitise();
-                cfg
+    /// Load from the default location.
+    ///
+    /// See [`ConfigLoad`] for why this does not simply return an `AppConfig`.
+    pub fn load_or_default() -> ConfigLoad {
+        read_config(&config_path())
+    }
+}
+
+/// The outcome of reading the configuration.
+///
+/// The distinction matters because of what happens next. Defaults carry no API
+/// token, and the application writes one out the moment it sees an empty one,
+/// so anything that hands back defaults also hands back a configuration that
+/// is about to be saved over whatever is on disk. When the file genuinely does
+/// not exist that is correct. When the file exists and could not be read, it
+/// would destroy somebody's layout, their calibration and their devices
+/// because of one unlucky moment, silently, on the next launch.
+///
+/// So the caller is told which case it is, and refuses to write in the one
+/// case where writing loses data. This crate reports rather than logs: it has
+/// no logging dependency and is not the right place to decide how a problem
+/// should be announced.
+pub enum ConfigLoad {
+    /// Read from disk.
+    Loaded(AppConfig),
+    /// There is no configuration file yet. Defaults are the right answer and
+    /// saving them is the right thing to do.
+    Fresh(AppConfig),
+    /// The file was not valid JSON. Retrying would not change that and
+    /// defaults would be written straight over it, so it was moved to `kept`
+    /// first: a configuration that cannot be parsed is still the only copy of
+    /// somebody's layout.
+    Replaced {
+        config: AppConfig,
+        error: ConfigError,
+        kept: PathBuf,
+    },
+    /// The file exists and could not be read. Defaults are in use to keep the
+    /// application working, but they must not be written back: the file on
+    /// disk is somebody's configuration and this process cannot read it.
+    Unreadable {
+        config: AppConfig,
+        error: ConfigError,
+    },
+}
+
+impl ConfigLoad {
+    pub fn config(&self) -> &AppConfig {
+        match self {
+            Self::Loaded(c) | Self::Fresh(c) => c,
+            Self::Replaced { config, .. } | Self::Unreadable { config, .. } => config,
+        }
+    }
+
+    pub fn into_config(self) -> AppConfig {
+        match self {
+            Self::Loaded(c) | Self::Fresh(c) => c,
+            Self::Replaced { config, .. } | Self::Unreadable { config, .. } => config,
+        }
+    }
+
+    /// Whether it is safe to write the configuration back out.
+    pub fn writable(&self) -> bool {
+        !matches!(self, Self::Unreadable { .. })
+    }
+}
+
+/// How many times to try reading before giving up.
+///
+/// A configuration file can be briefly unreadable for reasons that have
+/// nothing to do with its contents: a previous instance still shutting down
+/// and holding it, a backup tool, a virus scanner. Those clear in
+/// milliseconds, so trying again costs nothing and avoids treating a healthy
+/// file as a broken one.
+const LOAD_ATTEMPTS: u32 = 5;
+const LOAD_RETRY: std::time::Duration = std::time::Duration::from_millis(120);
+
+/// Read the configuration at `path`, saying which kind of answer it is.
+pub fn read_config(path: &Path) -> ConfigLoad {
+    let mut attempt = 0;
+    loop {
+        match AppConfig::load_from(path) {
+            Ok(cfg) => return ConfigLoad::Loaded(cfg),
+
+            // No file yet. A first run, not a problem.
+            Err(ConfigError::Io(e)) if e.kind() == std::io::ErrorKind::NotFound => {
+                return ConfigLoad::Fresh(defaults());
+            }
+
+            Err(ConfigError::Json(e)) => {
+                return match quarantine(path) {
+                    Ok(kept) => ConfigLoad::Replaced {
+                        config: defaults(),
+                        error: ConfigError::Json(e),
+                        kept,
+                    },
+                    // Could not even move it: still refuse to overwrite it.
+                    Err(_) => ConfigLoad::Unreadable {
+                        config: defaults(),
+                        error: ConfigError::Json(e),
+                    },
+                };
+            }
+
+            Err(e) => {
+                attempt += 1;
+                if attempt >= LOAD_ATTEMPTS {
+                    return ConfigLoad::Unreadable {
+                        config: defaults(),
+                        error: e,
+                    };
+                }
+                std::thread::sleep(LOAD_RETRY);
             }
         }
     }
+}
+
+fn defaults() -> AppConfig {
+    let mut cfg = AppConfig::default();
+    cfg.sanitise();
+    cfg
+}
+
+/// Move an unusable configuration out of the way, keeping it.
+///
+/// Never overwrites an earlier one, so a file that breaks repeatedly leaves a
+/// trail rather than a single survivor.
+fn quarantine(path: &Path) -> std::io::Result<PathBuf> {
+    for n in 0..1000 {
+        let candidate = path.with_extension(if n == 0 {
+            String::from("json.broken")
+        } else {
+            format!("json.broken.{n}")
+        });
+        if !candidate.exists() {
+            std::fs::rename(path, &candidate)?;
+            return Ok(candidate);
+        }
+    }
+    Err(std::io::Error::other(
+        "too many quarantined configurations already",
+    ))
 }
 
 /// Errors from reading or writing the configuration.

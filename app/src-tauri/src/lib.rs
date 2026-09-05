@@ -8,6 +8,7 @@
 use std::sync::Arc;
 
 use maslight_api::ApiServer;
+use maslight_core::profile::ConfigLoad;
 use maslight_core::{AppConfig, Layout, Rgb8, WizardParams};
 use maslight_engine::{EngineHandle, EngineStatus};
 use parking_lot::Mutex;
@@ -88,15 +89,39 @@ pub fn run() {
         )
         .init();
 
-    let mut config = AppConfig::load_or_default();
+    let loaded = AppConfig::load_or_default();
+    // Announce what happened here rather than inside the core crate, which has
+    // no logging and no business deciding how a problem is reported.
+    match &loaded {
+        ConfigLoad::Loaded(_) | ConfigLoad::Fresh(_) => {}
+        ConfigLoad::Replaced { error, kept, .. } => {
+            tracing::error!(
+                "the configuration is not valid json ({error}); it has been kept as {} and MasLight is starting from defaults",
+                kept.display()
+            );
+        }
+        ConfigLoad::Unreadable { error, .. } => {
+            tracing::error!(
+                "could not read the configuration ({error}); starting from defaults and refusing to write over it"
+            );
+        }
+    }
+    // Never write over a configuration this process could not read. Defaults
+    // carry no API token, and the block below would otherwise save them
+    // straight over somebody's layout, calibration and devices.
+    let may_write = loaded.writable();
+    let mut config = loaded.into_config();
+
     // A configuration that asks for the API but carries no token would refuse
     // to start the server, so fill one in before anything reads it.
     if config.ui.api_token.trim().is_empty() {
         config.ui.api_token = maslight_api::generate_token();
         // Write it straight away: a token that only exists in memory would
         // change on every launch and break every script that stored it.
-        if let Err(e) = config.save_to(&maslight_core::profile::config_path()) {
-            tracing::warn!("could not store the API token: {e}");
+        if may_write {
+            if let Err(e) = config.save_to(&maslight_core::profile::config_path()) {
+                tracing::warn!("could not store the API token: {e}");
+            }
         }
     }
     let start_minimised = config.ui.start_minimised;
