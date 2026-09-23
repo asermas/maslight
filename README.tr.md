@@ -191,6 +191,21 @@ Bunu açıkça yazmak uzun bir özellik listesinden daha önemli:
 * [Kaynaktan derleme](docs/building.md)
 * [Nasıl çalışıyor](docs/architecture.md)
 
+## Erken aşama
+
+Bu ilk public sürüm ve aktif olarak geliştirmeye devam ediyorum. **Geri bildirim
+ve bug raporları için minnettar olurum** — bu aşamada kaba bir rapor, hiç
+açılmayan özenli bir rapordan daha değerli. En faydalı olanlar:
+
+- **Gerçek bir şerit.** Fiziksel LED sürdüysen — hangi protokol, hangi kontrolcü
+  olursa olsun — neyin çalışıp neyin çalışmadığını yaz. Kendim doğrulayamadığım
+  tek şey bu.
+- **Yanlış görünen renkler.** Ekran, şerit ve mümkünse bir fotoğraf.
+- **Yakalama sorunları:** GPU, monitör düzeni, HDR ya da yenileme hızına bağlı.
+- **Linux**, özellikle Wayland compositor'ları.
+
+Hepsi için issue aç.
+
 ## Katkı
 
 [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bak. Kısası: `cargo test

@@ -197,6 +197,21 @@ Being plain about this matters more than a longer feature list:
 * [Building from source](docs/building.md)
 * [How it works](docs/architecture.md)
 
+## Early days
+
+This is the first public version, and I am still actively developing it.
+**I would be grateful for feedback and bug reports** — at this stage a rough
+report is worth more than a polished one that never gets filed. The most useful:
+
+- **A real strip.** If you drive physical LEDs with it — any protocol, any
+  controller — tell me what worked and what did not. That is the one thing I
+  have not been able to verify myself.
+- **Colours that look wrong.** Screen, strip, and a photo if you can.
+- **Capture problems** on your GPU, monitor layout, HDR setup or refresh rate.
+- **Linux**, especially Wayland compositors.
+
+Open an issue for any of it.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: `cargo test
